@@ -16,7 +16,7 @@ function showScatterPlot(data) {
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     const xScale = d3.scaleLinear()
-        .domain([6, d3.max(data, (d) => +d.user_review)])
+        .domain([3, d3.max(data, (d) => +d.user_review)])
         .range([0, width]);
 
     const yScale = d3.scaleLinear()
@@ -115,4 +115,59 @@ function showScatterPlot(data) {
         .attr("dy", ".35em")
         .style("text-anchor", "start")
         .text(d => d);
+
+    const brush = d3.brush()
+        .extent([[0, 0], [width, height]])
+        .on("end", brushended);
+
+    svg.append("g")
+        .attr("class", "brush")
+        .call(brush);
+
+    d3.select("body").append("button")
+        .text("Reset Zoom")
+        .on("click", resetZoom);
+
+    function brushended(event) {
+        if (!event.selection) return;
+
+        const [[x0, y0], [x1, y1]] = event.selection;
+        const selectedData = data.filter(d => {
+            const x = xScale(+d.user_review);
+            const y = yScale(+d.meta_score);
+            return x0 <= x && x <= x1 && y0 <= y && y <= y1;
+        });
+
+        xScale.domain([x0, x1].map(xScale.invert, xScale));
+        yScale.domain([y1, y0].map(yScale.invert, yScale));
+
+        svg.select(".brush").call(brush.move, null);
+
+        zoom(selectedData);
+    }
+
+    function zoom(selectedData) {
+        const t = svg.transition().duration(750);
+        svg.select(".x.axis").transition(t).call(xAxis);
+        svg.select(".y.axis").transition(t).call(yAxis);
+
+        svg.selectAll("circle").transition(t)
+            .attr("cx", (d) => xScale(+d.user_review))
+            .attr("cy", (d) => yScale(+d.meta_score))
+            .attr("r", d => selectedData.includes(d) ? 4 : 0);
+    }
+
+    function resetZoom() {
+        xScale.domain([3, d3.max(data, (d) => +d.user_review)]);
+        yScale.domain([84, d3.max(data, (d) => +d.meta_score)]);
+
+        const t = svg.transition().duration(750);
+        svg.select(".x.axis").transition(t).call(xAxis);
+        svg.select(".y.axis").transition(t).call(yAxis);
+
+        svg.selectAll("circle").transition(t)
+            .attr("cx", (d) => xScale(+d.user_review))
+            .attr("cy", (d) => yScale(+d.meta_score))
+            .attr("r", 4);
+    }
 }
