@@ -116,6 +116,7 @@ function showScatterPlot(data) {
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "4");
 
+    let activeGenre = null;
     const legend = svg.selectAll(".legend")
         .data(colorScale.domain())
         .enter().append("g")
@@ -259,7 +260,5 @@ function updateScatterPlot(data, selectedPlatforms) {
         .attr("cy", (d) => yScale(+d.meta_score))
         .attr("r", 4)
         .attr("fill", (d) => colorScale(d.genre));
-
-    attachTooltip();
 }
 
