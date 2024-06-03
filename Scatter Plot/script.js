@@ -85,12 +85,23 @@ function showScatterPlot(data) {
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "4");
 
-    // Add legend
+    let activeGenre = null;
     const legend = svg.selectAll(".legend")
         .data(colorScale.domain())
         .enter().append("g")
         .attr("class", "legend")
-        .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+        .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+        .on("click", function(event, genre) {
+            if (activeGenre === genre) {
+                svg.selectAll("circle")
+                    .style("opacity", 1);
+                activeGenre = null;
+            } else {
+                svg.selectAll("circle")
+                    .style("opacity", d => d.genre === genre ? 1 : 0.1);
+                activeGenre = genre;
+            }
+        });
 
     legend.append("rect")
         .attr("x", width + 20)
