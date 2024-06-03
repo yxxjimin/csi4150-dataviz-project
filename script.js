@@ -2,7 +2,7 @@ const width = 600;
 const height = 500;
 const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
-d3.csv("visualizer_joojak.csv").then((dataset) => {
+d3.csv("visualizer_preprocess.csv").then((dataset) => {
     showScatterPlot(dataset);
     d3.select("#changeColorButton").on("click", () => {
         const pointCounts = d3.rollup(
