@@ -177,8 +177,8 @@ function showScatterPlot(data) {
 
     function zoom(selectedData) {
         const t = svg.transition().duration(750);
-        svg.select(".x.axis").transition(t).call(xAxis);
-        svg.select(".y.axis").transition(t).call(yAxis);
+        xAxisGroup.transition(t).call(xAxis);
+        yAxisGroup.transition(t).call(yAxis);
 
         svg.selectAll("circle").transition(t)
             .attr("cx", (d) => xScale(+d.user_review))
@@ -192,8 +192,8 @@ function showScatterPlot(data) {
         yScale.domain([84, d3.max(data, (d) => +d.meta_score)]);
 
         const t = svg.transition().duration(750);
-        svg.select(".x.axis").transition(t).call(xAxis);
-        svg.select(".y.axis").transition(t).call(yAxis);
+        xAxisGroup.transition(t).call(xAxis);
+        yAxisGroup.transition(t).call(yAxis);
 
         svg.selectAll("circle").transition(t)
             .attr("cx", (d) => xScale(+d.user_review))
@@ -225,6 +225,7 @@ function showScatterPlot(data) {
 
     attachTooltip();
 }
+
 
 function updateScatterPlot(data, selectedPlatforms) {
     const filteredData = data.filter(d => selectedPlatforms.includes(d.platform));
@@ -262,25 +263,3 @@ function updateScatterPlot(data, selectedPlatforms) {
     attachTooltip();
 }
 
-function attachTooltip() {
-    const tooltip = d3.select(".tooltip");
-
-    d3.selectAll("circle")
-        .on("mouseover", (event, d) => {
-            tooltip.transition()
-                .duration(200)
-                .style("opacity", .9);
-            tooltip.html(`Name: ${d.name}<br/>Platform: ${d.platform}<br/>Release Date: ${d.release_date}<br/>Genre: ${d.genre}<br/>Meta Score: ${d.meta_score}<br/>User Review: ${d.user_review}`)
-                .style("left", (event.clientX + 10) + "px")
-                .style("top", (event.clientY - 25) + "px");
-        })
-        .on("mousemove", (event) => {
-            tooltip.style("left", (event.clientX + 10) + "px")
-                   .style("top", (event.clientY - 25) + "px");
-        })
-        .on("mouseout", () => {
-            tooltip.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
-}
