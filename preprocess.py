@@ -12,8 +12,18 @@ def generate_two_decimal(original):
     random_value = round(np.random.uniform(lower_bound, upper_bound), 2)
     return random_value
 
+# Function to generate a random one-decimal point number that rounds to the original one-decimal point number
+def generate_one_decimal(original):
+    lower_bound = original - 0.5
+    upper_bound = original + 0.5
+    random_value = round(np.random.uniform(lower_bound, upper_bound), 1)
+    return random_value
+
 # Apply the function to the user_review column
 data['user_review_two_decimal'] = data['user_review'].apply(lambda x: generate_two_decimal(x))
+
+# Apply the function to the meta_score column
+data['meta_score_one_decimal'] = data['meta_score'].apply(lambda x: generate_one_decimal(x))
 
 # Save the modified dataframe to a new CSV file
 output_path = 'visualizer_preprocess.csv'

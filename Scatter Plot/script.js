@@ -2,55 +2,16 @@ const width = 600;
 const height = 500;
 const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
-d3.csv("visualizer_preprocess.csv").then((dataset) => {
+d3.csv("../visualizer_preprocess.csv").then((dataset) => {
     showScatterPlot(dataset);
-    d3.select("#changeColorButton").on("click", () => {
-        const pointCounts = d3.rollup(
-            dataset,
-            v => v.length,
-            d => +d.user_review,
-            d => +d.meta_score
-        );
-
-        const maxCount = d3.max(Array.from(pointCounts.values()).flat());
-        const colorScale = d3.scaleSequential()
-            .domain([1, maxCount])
-            .interpolator(d3.interpolateBlues);
-        d3.selectAll("circle")
-            .attr("fill", d => {
-                const count = pointCounts.get(+d.user_review).get(+d.meta_score);
-                return colorScale(count);
-            })
-            .on("mouseover", (event, d) => {
-                const count = pointCounts.get(+d.user_review).get(+d.meta_score);
-                tooltip.transition()
-                    .duration(200)
-                    .style("opacity", .9);
-                tooltip.html(`Occurrences: ${count}`)
-                    .style("left", (event.clientX + 10) + "px")
-                    .style("top", (event.clientY - 25) + "px");
-            })
-            .on("mousemove", (event) => {
-                tooltip.style("left", (event.clientX + 10) + "px")
-                       .style("top", (event.clientY - 25) + "px");
-            })
-            .on("mouseout", () => {
-                tooltip.transition()
-                    .duration(500)
-                    .style("opacity", 0);
-            });
-
-        // Remove the legend
-        d3.selectAll(".legend").remove();
-    });
 });
 
 function showScatterPlot(data) {
     const svg = d3
         .select("#chart")
         .append("svg")
-        .attr("width", width + margin.left + margin.right + 100) // Additional space for legend
-        .attr("height", height + margin.top + margin.bottom)
+        .attr("width", width + margin.left + margin.right + 500)
+        .attr("height", height + margin.top + margin.bottom + 200)
         .append("g")
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 

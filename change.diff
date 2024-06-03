@@ -1,0 +1,1470 @@
+diff --git a/index.html b/Scatter Plot/scatterplot.html
+similarity index 84%
+rename from index.html
+rename to Scatter Plot/scatterplot.html
+index 3f78f32..9a23a04 100644
+--- a/index.html
++++ b/Scatter Plot/scatterplot.html	
+@@ -7,6 +7,5 @@
+ </head>
+ <body>
+     <div id="chart"></div>
+-    <button id="changeColorButton">Button</button>
+ </body>
+ </html>
+diff --git a/script.js b/Scatter Plot/script.js
+similarity index 66%
+rename from script.js
+rename to Scatter Plot/script.js
+index b76ff11..613f556 100644
+--- a/script.js
++++ b/Scatter Plot/script.js	
+@@ -2,55 +2,16 @@ const width = 600;
+ const height = 500;
+ const margin = { top: 20, right: 30, bottom: 30, left: 40 };
+ 
+-d3.csv("visualizer_preprocess.csv").then((dataset) => {
++d3.csv("../visualizer_preprocess.csv").then((dataset) => {
+     showScatterPlot(dataset);
+-    d3.select("#changeColorButton").on("click", () => {
+-        const pointCounts = d3.rollup(
+-            dataset,
+-            v => v.length,
+-            d => +d.user_review,
+-            d => +d.meta_score
+-        );
+-
+-        const maxCount = d3.max(Array.from(pointCounts.values()).flat());
+-        const colorScale = d3.scaleSequential()
+-            .domain([1, maxCount])
+-            .interpolator(d3.interpolateBlues);
+-        d3.selectAll("circle")
+-            .attr("fill", d => {
+-                const count = pointCounts.get(+d.user_review).get(+d.meta_score);
+-                return colorScale(count);
+-            })
+-            .on("mouseover", (event, d) => {
+-                const count = pointCounts.get(+d.user_review).get(+d.meta_score);
+-                tooltip.transition()
+-                    .duration(200)
+-                    .style("opacity", .9);
+-                tooltip.html(`Occurrences: ${count}`)
+-                    .style("left", (event.clientX + 10) + "px")
+-                    .style("top", (event.clientY - 25) + "px");
+-            })
+-            .on("mousemove", (event) => {
+-                tooltip.style("left", (event.clientX + 10) + "px")
+-                       .style("top", (event.clientY - 25) + "px");
+-            })
+-            .on("mouseout", () => {
+-                tooltip.transition()
+-                    .duration(500)
+-                    .style("opacity", 0);
+-            });
+-
+-        // Remove the legend
+-        d3.selectAll(".legend").remove();
+-    });
+ });
+ 
+ function showScatterPlot(data) {
+     const svg = d3
+         .select("#chart")
+         .append("svg")
+-        .attr("width", width + margin.left + margin.right + 100) // Additional space for legend
+-        .attr("height", height + margin.top + margin.bottom)
++        .attr("width", width + margin.left + margin.right + 500)
++        .attr("height", height + margin.top + margin.bottom + 200)
+         .append("g")
+         .attr("transform", `translate(${margin.left}, ${margin.top})`);
+ 
+diff --git a/style.css b/Scatter Plot/style.css
+similarity index 100%
+rename from style.css
+rename to Scatter Plot/style.css
+diff --git a/change.diff b/change.diff
+new file mode 100644
+index 0000000..e69de29
+diff --git a/dataset.csv b/dataset.csv
+deleted file mode 100644
+index 8479a17..0000000
+--- a/dataset.csv
++++ /dev/null
+@@ -1,201 +0,0 @@
+-height,weight
+-65.78,112.99
+-71.52,136.49
+-69.4,153.03
+-68.22,142.34
+-67.79,144.3
+-68.7,123.3
+-69.8,141.49
+-70.01,136.46
+-67.9,112.37
+-66.78,120.67
+-66.49,127.45
+-67.62,114.14
+-68.3,125.61
+-67.12,122.46
+-68.28,116.09
+-71.09,140
+-66.46,129.5
+-68.65,142.97
+-71.23,137.9
+-67.13,124.04
+-67.83,141.28
+-68.88,143.54
+-63.48,97.9
+-68.42,129.5
+-67.63,141.85
+-67.21,129.72
+-70.84,142.42
+-67.49,131.55
+-66.53,108.33
+-65.44,113.89
+-69.52,103.3
+-65.81,120.75
+-67.82,125.79
+-70.6,136.22
+-71.8,140.1
+-69.21,128.75
+-66.8,141.8
+-67.66,121.23
+-67.81,131.35
+-64.05,106.71
+-68.57,124.36
+-65.18,124.86
+-69.66,139.67
+-67.97,137.37
+-65.98,106.45
+-68.67,128.76
+-66.88,145.68
+-67.7,116.82
+-69.82,143.62
+-69.09,134.93
+-69.91,147.02
+-67.33,126.33
+-70.27,125.48
+-69.1,115.71
+-65.38,123.49
+-70.18,147.89
+-70.41,155.9
+-66.54,128.07
+-66.36,119.37
+-67.54,133.81
+-66.5,128.73
+-69,137.55
+-68.3,129.76
+-67.01,128.82
+-70.81,135.32
+-68.22,109.61
+-69.06,142.47
+-67.73,132.75
+-67.22,103.53
+-67.37,124.73
+-65.27,129.31
+-70.84,134.02
+-69.92,140.4
+-64.29,102.84
+-68.25,128.52
+-66.36,120.3
+-68.36,138.6
+-65.48,132.96
+-69.72,115.62
+-67.73,122.52
+-68.64,134.63
+-66.78,121.9
+-70.05,155.38
+-66.28,128.94
+-69.2,129.1
+-69.13,139.47
+-67.36,140.89
+-70.09,131.59
+-70.18,121.12
+-68.23,131.51
+-68.13,136.55
+-70.24,141.49
+-71.49,140.61
+-69.2,112.14
+-70.06,133.46
+-70.56,131.8
+-66.29,120.03
+-63.43,123.1
+-66.77,128.14
+-68.89,115.48
+-64.87,102.09
+-67.09,130.35
+-68.35,134.18
+-65.61,98.64
+-67.76,114.56
+-68.02,123.49
+-67.66,123.05
+-66.31,126.48
+-69.44,128.42
+-63.84,127.19
+-67.72,122.06
+-70.05,127.61
+-70.19,131.64
+-65.95,111.9
+-70.01,122.04
+-68.61,128.55
+-68.81,132.68
+-69.76,136.06
+-65.46,115.94
+-68.83,136.9
+-65.8,119.88
+-67.21,109.01
+-69.42,128.27
+-68.94,135.29
+-67.94,106.86
+-65.63,123.29
+-66.5,109.51
+-67.93,119.31
+-68.89,140.24
+-70.24,133.98
+-68.27,132.58
+-71.23,130.7
+-69.1,115.56
+-64.4,123.79
+-71.1,128.14
+-68.22,135.96
+-65.92,116.63
+-67.44,126.82
+-73.9,151.39
+-69.98,130.4
+-69.52,136.21
+-65.18,113.4
+-68.01,125.33
+-68.34,127.58
+-65.18,107.16
+-68.26,116.46
+-68.57,133.84
+-64.5,112.89
+-68.71,130.76
+-68.89,137.76
+-69.54,125.4
+-67.4,138.47
+-66.48,120.82
+-66.01,140.15
+-72.44,136.74
+-64.13,106.11
+-70.98,158.96
+-67.5,108.79
+-72.02,138.78
+-65.31,115.91
+-67.08,146.29
+-64.39,109.88
+-69.37,139.05
+-68.38,119.9
+-65.31,128.31
+-67.14,127.24
+-68.39,115.23
+-66.29,124.8
+-67.19,126.95
+-65.99,111.27
+-69.43,122.61
+-67.97,124.21
+-67.76,124.65
+-65.28,119.52
+-73.83,139.3
+-66.81,104.83
+-66.89,123.04
+-65.74,118.89
+-65.98,121.49
+-66.58,119.25
+-67.11,135.02
+-65.87,116.23
+-66.78,109.17
+-68.74,124.22
+-66.23,141.16
+-65.96,129.15
+-68.58,127.87
+-66.59,120.92
+-66.97,127.65
+-68.08,101.47
+-70.19,144.99
+-65.52,110.95
+-67.46,132.86
+-67.41,146.34
+-69.66,145.59
+-65.8,120.84
+-66.11,115.78
+-68.24,128.3
+-68.02,127.47
+-71.39,127.88
+diff --git a/joojak.py b/joojak.py
+deleted file mode 100644
+index 3f121cf..0000000
+--- a/joojak.py
++++ /dev/null
+@@ -1,22 +0,0 @@
+-import pandas as pd
+-import numpy as np
+-
+-# Load the CSV file
+-file_path = 'visualizer.csv'
+-data = pd.read_csv(file_path)
+-
+-# Function to generate a random two-decimal point number that rounds to the original one-decimal point number
+-def generate_two_decimal(original):
+-    lower_bound = original - 0.05
+-    upper_bound = original + 0.05
+-    random_value = round(np.random.uniform(lower_bound, upper_bound), 2)
+-    return random_value
+-
+-# Apply the function to the user_review column
+-data['user_review_two_decimal'] = data['user_review'].apply(lambda x: generate_two_decimal(x))
+-
+-# Save the modified dataframe to a new CSV file
+-output_path = 'visualizer_joojak.csv'
+-data.to_csv(output_path, index=False)
+-
+-data.head()
+diff --git a/preprocess.py b/preprocess.py
+index c02b83f..3354429 100644
+--- a/preprocess.py
++++ b/preprocess.py
+@@ -12,9 +12,19 @@ def generate_two_decimal(original):
+     random_value = round(np.random.uniform(lower_bound, upper_bound), 2)
+     return random_value
+ 
++# Function to generate a random one-decimal point number that rounds to the original one-decimal point number
++def generate_one_decimal(original):
++    lower_bound = original - 0.5
++    upper_bound = original + 0.5
++    random_value = round(np.random.uniform(lower_bound, upper_bound), 1)
++    return random_value
++
+ # Apply the function to the user_review column
+ data['user_review_two_decimal'] = data['user_review'].apply(lambda x: generate_two_decimal(x))
+ 
++# Apply the function to the meta_score column
++data['meta_score_one_decimal'] = data['meta_score'].apply(lambda x: generate_one_decimal(x))
++
+ # Save the modified dataframe to a new CSV file
+ output_path = 'visualizer_preprocess.csv'
+ data.to_csv(output_path, index=False)
+diff --git a/visualizer_joojak.csv b/visualizer_joojak.csv
+deleted file mode 100644
+index 93c34d5..0000000
+--- a/visualizer_joojak.csv
++++ /dev/null
+@@ -1,374 +0,0 @@
+-name,platform,release_date,meta_score,user_review,genre,target_age
+-Sid Meier`s Civilization II,PC,29-Feb-96,94,8.84,Strategy,K-A
+-Quake,PC,22-Jun-96,94,8.78,FPS,M
+-Diablo,PC,31-Dec-96,94,8.7,ARPG,M
+-Sid Meier`s Gettysburg!,PC,30-Sep-97,92,7.36,Strategy,K-A
+-Star Wars Jedi Knight: Dark Forces II,PC,09-Oct-97,91,8.57,FPS,T
+-Myth: The Fallen Lords,PC,31-Oct-97,91,8.47,Strategy,M
+-Grim Fandango,PC,14-Oct-98,94,9.09,Adventure,T
+-Half-Life,PC,19-Nov-98,96,9.08,FPS,M
+-Thief: The Dark Project,PC,30-Nov-98,92,8.97,Adventure,M
+-Baldur`s Gate,PC,21-Dec-98,91,8.93,RPG,T
+-Sid Meier`s Alpha Centauri,PC,12-Feb-99,92,8.81,Strategy,E
+-System Shock 2,PC,11-Aug-99,92,9.06,Survival,M
+-Homeworld,PC,31-Aug-99,93,8.8,RTS,E
+-FreeSpace 2,PC,30-Sep-99,91,8.69,Strategy,E
+-Age of Empires II: The Age of Kings,PC,30-Sep-99,92,9.07,RTS,T
+-Planescape: Torment,PC,14-Dec-99,91,9.18,RPG,T
+-The Sims,PC,04-Feb-00,92,7.86,Simulation,T
+-Baldur`s Gate II: Shadows of Amn,PC,24-Sep-00,95,9.14,RPG,T
+-NHL 2001,PC,28-Sep-00,90,6.52,Sports,E
+-Tony Hawk`s Pro Skater 2,PC,25-Oct-00,91,8.52,Sports,T
+-The Operative: No One Lives Forever,PC,11-Nov-00,91,8.66,FPS,M
+-The Longest Journey,PC,16-Nov-00,91,8.67,Point and Click,M
+-IL-2 Sturmovik,PC,18-Nov-01,91,8.65,Simulation,T
+-Medal of Honor: Allied Assault,PC,20-Jan-02,91,8.54,FPS,T
+-Grand Theft Auto III,PC,20-May-02,93,8.25,Open World,M
+-Neverwinter Nights,PC,16-Jun-02,91,8.18,RPG,T
+-Warcraft III: Reign of Chaos,PC,03-Jul-02,92,9.18,RTS,T
+-No One Lives Forever 2: A Spy in H.A.R.M.`s Way,PC,30-Sep-02,91,8.59,Adventure,M
+-Tiger Woods PGA Tour 2003,PC,31-Oct-02,92,5.01,Sports,E
+-Tom Clancy`s Splinter Cell,PC,19-Feb-03,91,8.5,Adventure,T
+-Grand Theft Auto: Vice City,PC,12-May-03,94,8.84,Open World,M
+-F1 Challenge `99-`02,PC,24-Jun-03,91,7.58,Racing,E
+-Madden NFL 2004,PC,12-Aug-03,91,7.08,Sports,E
+-Call of Duty,PC,29-Oct-03,91,8.36,FPS,T
+-Star Wars: Knights of the Old Republic,PC,18-Nov-03,93,8.96,RPG,T
+-Unreal Tournament 2004,PC,16-Mar-04,93,8.76,FPS,M
+-World Sports Winning Eleven 7 International,PC,09-Apr-04,92,6.92,Sports,E
+-The Sims 2,PC,14-Sep-04,90,8.72,Simulation,T
+-Tiger Woods PGA Tour 2005,PC,20-Sep-04,91,3.85,Sports,E
+-Rome: Total War,PC,22-Sep-04,92,8.95,RTS,T
+-Half-Life 2,PC,16-Nov-04,96,9.17,FPS,M
+-World of Warcraft,PC,23-Nov-04,93,7.36,RPG,T
+-Tom Clancy`s Splinter Cell: Chaos Theory,PC,28-Mar-05,92,8.67,Adventure,T
+-Grand Theft Auto: San Andreas,PC,07-Jun-05,93,8.92,Open World,M
+-Battlefield 2,PC,21-Jun-05,91,8.43,FPS,T
+-Sid Meier`s Civilization IV,PC,25-Oct-05,94,8.2,Strategy,E
+-The Elder Scrolls IV: Oblivion,PC,20-Mar-06,94,8.18,RPG,M
+-Company of Heroes,PC,13-Sep-06,93,8.67,RTS,M
+-World of Warcraft: The Burning Crusade,PC,16-Jan-07,91,6.7,RPG,T
+-Galactic Civilizations II: Dark Avatar,PC,14-Feb-07,91,7.77,Strategy,E
+-The Elder Scrolls IV: Oblivion,PlayStation,20-Mar-07,93,8.25,RPG,M
+-BioShock,PC,21-Aug-07,96,8.56,FPS,M
+-Team Fortress 2,PC,10-Oct-07,92,8.97,FPS,M
+-Portal,PC,10-Oct-07,90,9.21,FPS,T
+-The Orange Box,PC,10-Oct-07,96,9.33,FPS,M
+-Ratchet & Clank Future: Tools of Destruction,PlayStation,23-Oct-07,89,8.76,Platformer,E
+-Call of Duty 4: Modern Warfare,PlayStation,05-Nov-07,94,8.45,FPS,M
+-Call of Duty 4: Modern Warfare,PC,05-Nov-07,92,8.54,FPS,M
+-Crysis,PC,13-Nov-07,91,8.14,FPS,M
+-Uncharted: Drake`s Fortune,PlayStation,16-Nov-07,88,7.94,Adventure,T
+-Rock Band,PlayStation,20-Nov-07,92,8.08,Rhythm,T
+-The Orange Box,PlayStation,11-Dec-07,89,8.3,FPS,M
+-Burnout Paradise,PlayStation,22-Jan-08,87,7.73,Racing,E
+-Grand Theft Auto IV,PlayStation,29-Apr-08,98,7.71,Open World,M
+-Galactic Civilizations II: Twilight of the Arnor,PC,30-Apr-08,92,8.18,Strategy,E
+-GRID,PlayStation,03-Jun-08,87,8,Racing,E
+-Metal Gear Solid 4: Guns of the Patriots,PlayStation,12-Jun-08,94,8.79,Adventure,M
+-Bionic Commando Rearmed,PlayStation,14-Aug-08,87,7.9,Platformer,M
+-NHL 09,PlayStation,09-Sep-08,88,7.82,Sports,E
+-World of Goo,PC,12-Oct-08,90,8.39,Puzzle,E
+-FIFA Sports 09,PlayStation,13-Oct-08,87,7.46,Sports,E
+-Dead Space,PlayStation,13-Oct-08,88,8.81,Survival,M
+-Rock Band 2,PlayStation,19-Oct-08,91,7.99,Rhythm,T
+-BioShock,PlayStation,21-Oct-08,94,8.91,FPS,M
+-LittleBigPlanet,PlayStation,27-Oct-08,95,6.8,Platformer,E
+-Fallout 3,PC,28-Oct-08,91,7.84,RPG,M
+-Fallout 3,PlayStation,28-Oct-08,90,7.92,RPG,M
+-World of Warcraft: Wrath of the Lich King,PC,13-Nov-08,91,7.94,RPG,T
+-Super Street Fighter II Turbo HD Remix,PlayStation,25-Nov-08,87,7.62,Fighting,T
+-Street Fighter IV,PlayStation,17-Feb-09,94,7.39,Fighting,T
+-Killzone 2,PlayStation,27-Feb-09,91,8.08,FPS,M
+-MLB 09: The Show,PlayStation,03-Mar-09,90,8.1,Sports,E
+-Fight Night Round 4,PlayStation,23-Jun-09,88,7.56,Sports,T
+-BlazBlue: Calamity Trigger,PlayStation,30-Jun-09,87,8.46,Fighting,T
+-Street Fighter IV,PC,01-Jul-09,91,7.75,Fighting,T
+-Wipeout HD Fury,PlayStation,23-Jul-09,89,8.22,Racing,E
+-Batman: Arkham Asylum,PlayStation,25-Aug-09,91,8.81,Adventure,T
+-DiRT 2,PlayStation,08-Sep-09,87,8.22,Racing,T
+-The Beatles: Rock Band,PlayStation,09-Sep-09,88,8.24,Rhythm,T
+-NHL 10,PlayStation,15-Sep-09,88,8.09,Sports,E
+-Batman: Arkham Asylum,PC,15-Sep-09,91,8.55,Adventure,T
+-Demon`s Souls,PlayStation,06-Oct-09,89,8.71,RPG,M
+-Critter Crunch,PlayStation,08-Oct-09,87,7.3,Puzzle,E
+-Uncharted 2: Among Thieves,PlayStation,13-Oct-09,96,8.8,Adventure,T
+-FIFA Sports 10,PlayStation,20-Oct-09,91,7.57,Sports,E
+-Dragon Age: Origins,PlayStation,03-Nov-09,87,8.05,RPG,M
+-Dragon Age: Origins,PC,03-Nov-09,91,8.78,RPG,M
+-Call of Duty: Modern Warfare 2,PlayStation,10-Nov-09,94,6.6,FPS,M
+-Braid,PlayStation,12-Nov-09,93,7.76,Platformer,E
+-Assassin`s Creed II,PlayStation,17-Nov-09,91,8.67,Open World,M
+-God of War Collection,PlayStation,17-Nov-09,91,8.83,Adventure,M
+-Peggle,PlayStation,19-Nov-09,91,7.3,Puzzle,E
+-Mass Effect 2,PC,26-Jan-10,94,8.93,RPG,M
+-BioShock 2,PlayStation,09-Feb-10,88,8.2,FPS,M
+-Heavy Rain,PlayStation,23-Feb-10,87,7.83,Adventure,M
+-MLB 10: The Show,PlayStation,02-Mar-10,91,8.15,Sports,E
+-Battlefield: Bad Company 2,PlayStation,02-Mar-10,88,8.55,FPS,M
+-God of War III,PlayStation,16-Mar-10,92,8.77,Adventure,M
+-Super Street Fighter IV,PlayStation,27-Apr-10,92,7.81,Fighting,T
+-Red Dead Redemption,PlayStation,18-May-10,95,8.92,Open World,M
+-Monkey Island 2 Special Edition: LeChuck`s Revenge,PlayStation,06-Jul-10,87,8.11,Point and Click,E
+-BlazBlue: Continuum Shift,PlayStation,27-Jul-10,87,8.06,Fighting,T
+-Starcraft II: Wings of Liberty,PC,27-Jul-10,93,8.32,RTS,T
+-NHL 11,PlayStation,07-Sep-10,88,7.16,Sports,E
+-FIFA Sports 11,PlayStation,28-Sep-10,89,8.07,Sports,E
+-NBA 2K11,PlayStation,05-Oct-10,89,7.96,Sports,E
+-Rock Band 3,PlayStation,26-Oct-10,91,8.1,Rhythm,T
+-Red Dead Redemption: Undead Nightmare Pack,PlayStation,26-Oct-10,87,8.31,Open World,M
+-Call of Duty: Black Ops,PlayStation,09-Nov-10,88,6.82,FPS,M
+-Need for Speed: Hot Pursuit,PlayStation,16-Nov-10,89,7.37,Racing,E
+-Assassin`s Creed: Brotherhood,PlayStation,16-Nov-10,90,8.27,Open World,M
+-Pac-Man Championship Edition DX,PlayStation,23-Nov-10,91,7.87,Arcade,E
+-World of Warcraft: Cataclysm,PC,07-Dec-10,90,5.77,RPG,M
+-Battlefield: Bad Company 2 Vietnam,PlayStation,21-Dec-10,88,8.25,FPS,M
+-Mass Effect 2,PlayStation,17-Jan-11,94,8.66,RPG,M
+-LittleBigPlanet 2,PlayStation,18-Jan-11,91,8.58,Platformer,E
+-Dead Space 2,PlayStation,25-Jan-11,89,8.5,Survival,M
+-MLB 11: The Show,PlayStation,08-Mar-11,90,7.98,Sports,E
+-Portal 2,PC,18-Apr-11,95,9.14,FPS,T
+-Portal 2,PlayStation,19-Apr-11,95,8.73,FPS,T
+-L.A. Noire,PlayStation,17-May-11,89,7.8,Open World,M
+-DiRT 3,PlayStation,24-May-11,87,7.23,Racing,T
+-LIMBO,PlayStation,19-Jul-11,90,8,Platformer,T
+-Deus Ex: Human Revolution,PlayStation,23-Aug-11,89,8.28,Adventure,M
+-FIFA Sports 12,PlayStation,27-Sep-11,90,7.17,Sports,E
+-The ICO & Shadow of the Colossus Collection,PlayStation,27-Sep-11,92,8.73,Adventure,T
+-NBA 2K12,PlayStation,04-Oct-11,90,6.81,Sports,E
+-Dark Souls,PlayStation,04-Oct-11,89,8.88,RPG,M
+-Batman: Arkham City,PlayStation,18-Oct-11,96,8.78,Adventure,T
+-Uncharted 3: Drake`s Deception,PlayStation,01-Nov-11,92,8.44,Adventure,T
+-Call of Duty: Modern Warfare 3,PlayStation,08-Nov-11,88,3.31,FPS,M
+-Metal Gear Solid HD Collection,PlayStation,08-Nov-11,89,8.94,Adventure,M
+-The Elder Scrolls V: Skyrim,PC,10-Nov-11,94,8.42,RPG,M
+-The Elder Scrolls V: Skyrim,PlayStation,11-Nov-11,92,6.59,RPG,M
+-Rayman Origins,PlayStation,15-Nov-11,87,8.53,Platformer,T
+-Minecraft,PC,18-Nov-11,93,8.03,Sandbox,E
+-Batman: Arkham City,PC,21-Nov-11,91,8.65,Adventure,T
+-Mass Effect 3,PlayStation,05-Mar-12,93,5.76,RPG,M
+-Journey,PlayStation,13-Mar-12,92,8.76,Platformer,E
+-Max Payne 3,PlayStation,15-May-12,87,7.9,TPS,M
+-The Walking Dead: Episode 3 - Long Road Ahead,PlayStation,28-Aug-12,87,7.91,Point and Click,M
+-Borderlands 2,PlayStation,18-Sep-12,91,8.16,FPS,M
+-FIFA Sports 13,PlayStation,25-Sep-12,88,6.55,Sports,E
+-NBA 2K13,PlayStation,02-Oct-12,90,8.03,Sports,E
+-Dishonored,PC,08-Oct-12,91,8.54,Adventure,M
+-Dishonored,PlayStation,09-Oct-12,89,7.93,Adventure,M
+-XCOM: Enemy Unknown,PlayStation,09-Oct-12,89,8.25,Strategy,M
+-Mark of the Ninja,PC,16-Oct-12,91,7.99,Platformer,M
+-Okami HD,PlayStation,30-Oct-12,90,9.03,Adventure,T
+-The Walking Dead: Episode 5 - No Time Left,PlayStation,20-Nov-12,88,8.7,Point and Click,M
+-Far Cry 3,PlayStation,04-Dec-12,90,8.6,FPS,M
+-MLB 13: The Show,PlayStation,05-Mar-13,87,7.89,Sports,E
+-Tomb Raider,PlayStation,05-Mar-13,87,8.27,Adventure,M
+-BioShock Infinite,PC,25-Mar-13,94,8.62,FPS,M
+-BioShock Infinite,PlayStation,26-Mar-13,94,8.45,FPS,M
+-Fez,PC,01-May-13,91,6.7,Platformer,E
+-The Last of Us,PlayStation,14-Jun-13,95,9.25,Adventure,E
+-Hotline Miami,PlayStation,25-Jun-13,87,8.3,Adventure,M
+-Spelunky,PC,08-Aug-13,90,7.35,Platformer,T
+-Rayman Legends,PlayStation,03-Sep-13,91,8.68,Platformer,E
+-Grand Theft Auto V,PlayStation,17-Sep-13,97,8.31,Open World,M
+-Assassin`s Creed IV: Black Flag,PlayStation,29-Oct-13,88,8.23,Open World,M
+-The Last of Us: Left Behind,PlayStation,14-Feb-14,88,4.66,Adventure,E
+-Dark Souls II,PlayStation,11-Mar-14,91,8.13,RPG,T
+-Dark Souls II,PC,25-Apr-14,91,7.25,RPG,T
+-Kentucky Route Zero - Act III,PC,06-May-14,91,6.61,Adventure,E
+-The Walking Dead: Season Two Episode 5 - No Going Back,PlayStation,26-Aug-14,87,8.14,Point and Click,M
+-Grand Theft Auto V,PC,13-Apr-15,96,7.81,Open World,M
+-The Witcher 3: Wild Hunt,PC,18-May-15,93,9.41,RPG,M
+-Metal Gear Solid V: The Phantom Pain,PC,01-Sep-15,91,7.83,Open World,M
+-Undertale,PC,15-Sep-15,92,8.43,JRPG,E
+-Out of the Park Baseball 17,PC,22-Mar-16,92,3.31,Sports,E
+-Stephen`s Sausage Roll,PC,18-Apr-16,90,5.5,Puzzle,E
+-Overwatch,PC,23-May-16,91,6.53,FPS,T
+-The Witcher 3: Wild Hunt - Blood and Wine,PC,30-May-16,92,9.28,RPG,M
+-Shovel Knight: Treasure Trove,Switch,03-Mar-17,91,8.17,Platformer,E
+-The Legend of Zelda: Breath of the Wild,Switch,03-Mar-17,97,8.67,Open World,E
+-The Binding of Isaac: Afterbirth +,Switch,17-Mar-17,85,8.29,Top-Down Shoot-`Em-Up,M
+-Mario Kart 8 Deluxe,Switch,28-Apr-17,92,8.61,Racing,E
+-Thumper,Switch,18-May-17,85,8.08,Rhythm,E
+-Cave Story +,Switch,20-Jun-17,88,7.86,Metroidvania,E
+-Sonic Mania,Switch,15-Aug-17,86,8.43,Platformer,E
+-Divinity: Original Sin II,PC,14-Sep-17,93,8.83,RPG,E
+-SteamWorld Dig 2,Switch,21-Sep-17,88,8.57,Metroidvania,E
+-Axiom Verge,Switch,05-Oct-17,87,8.37,Metroidvania,E
+-Stardew Valley,Switch,05-Oct-17,87,8.66,RPG,E
+-Super Mario Odyssey,Switch,27-Oct-17,97,8.93,Platformer,E
+-Rocket League,Switch,14-Nov-17,86,7.77,Sports,E
+-Okami HD,PC,12-Dec-17,92,7.87,Adventure,T
+-Enter the Gungeon,Switch,14-Dec-17,87,8.03,Top-Down Shoot-`Em-Up,T
+-SteamWorld Heist: Ultimate Edition,Switch,28-Dec-17,91,8.27,Strategy,E
+-Celeste,Switch,25-Jan-18,92,8.58,Platformer,E
+-Crypt of the NecroDancer: Nintendo Switch Edition,Switch,01-Feb-18,86,7.2,Rhythm,E
+-Night in the Woods,Switch,01-Feb-18,85,7.5,Adventure,E
+-Owlboy,Switch,13-Feb-18,87,7.28,Adventure,E
+-Bayonetta 2,Switch,16-Feb-18,92,8.52,Adventure,M
+-Bayonetta + Bayonetta 2,Switch,16-Feb-18,90,8.7,Adventure,M
+-Shantae and the Pirate`s Curse,Switch,20-Mar-18,86,8.29,Platformer,E
+-Donkey Kong Country: Tropical Freeze,Switch,04-May-18,86,8.61,Platformer,E
+-Ikaruga,Switch,29-May-18,88,7.73,Arcade,E
+-West of Loathing,Switch,31-May-18,85,8.15,RPG,T
+-Hollow Knight,Switch,12-Jun-18,90,8.99,Metroidvania,E
+-Minecraft,Switch,21-Jun-18,86,7.54,Sandbox,E
+-INSIDE,Switch,28-Jun-18,91,8.55,Platformer,M
+-Sonic Mania Plus,Switch,17-Jul-18,91,8.09,Platformer,E
+-Iconoclasts,Switch,02-Aug-18,87,7.9,Metroidvania,T
+-Dead Cells,Switch,07-Aug-18,89,8.43,Metroidvania,T
+-Okami HD,Switch,09-Aug-18,89,8.61,Adventure,T
+-Into the Breach,Switch,28-Aug-18,89,7.84,Strategy,E
+-The Messenger,Switch,30-Aug-18,86,8.4,Metroidvania,E
+-Mini Metro,Switch,30-Aug-18,86,8.38,Management,E
+-Hyper Light Drifter,Switch,06-Sep-18,88,7.69,ARPG,T
+-Bastion,Switch,13-Sep-18,90,7.71,ARPG,E
+-Undertale,Switch,18-Sep-18,93,8.15,JRPG,E
+-Velocity 2X,Switch,20-Sep-18,87,8,Top-Down Shoot-`Em-Up,E
+-Dragon Ball FighterZ,Switch,28-Sep-18,87,7.77,Fighting,T
+-Guacamelee! Super Turbo Championship Edition,Switch,08-Oct-18,86,8.04,Metroidvania,E
+-Transistor,Switch,01-Nov-18,86,8.24,ARPG,T
+-Diablo III: Eternal Collection,Switch,02-Nov-18,88,7.51,ARPG,M
+-Sid Meier`s Civilization VI,Switch,16-Nov-18,86,7.65,Strategy,E
+-Warframe,Switch,20-Nov-18,86,8.3,TPS,M
+-Monster Boy and the Cursed Kingdom,Switch,04-Dec-18,86,8.29,Metroidvania,E
+-Katamari Damacy REROLL,Switch,07-Dec-18,87,8.26,Adventure,E
+-Super Smash Bros. Ultimate,Switch,07-Dec-18,93,8.56,Fighting,E
+-Guacamelee! 2,Switch,10-Dec-18,87,8.3,Metroidvania,E
+-Downwell,Switch,31-Jan-19,88,7.3,ARPG,E
+-BlazBlue: Central Fiction - Special Edition,Switch,07-Feb-19,86,8.51,Fighting,T
+-Steins;Gate Elite,Switch,19-Feb-19,85,7.89,Visual Novel,M
+-Assault Android Cactus+,Switch,08-Mar-19,86,8.43,Top-Down Shoot-`Em-Up,E
+-Blaster Master Zero II,Switch,20-Mar-19,85,8.47,Top-Down Shoot-`Em-Up,E
+-Cuphead,Switch,17-Apr-19,87,8.41,Platformer,E
+-Final Fantasy XII: The Zodiac Age,Switch,30-Apr-19,85,8.58,JRPG,T
+-Beat Saber,PC,21-May-19,93,8.41,Rhythm,E
+-Slay the Spire,Switch,06-Jun-19,85,8.26,Card Battle,E
+-Cadence of Hyrule: Crypt of the NecroDancer Featuring The Legend of Zelda,Switch,13-Jun-19,85,8.09,Rhythm,E
+-Super Mario Maker 2,Switch,28-Jun-19,88,8.55,Platformer,E
+-Final Fantasy XIV: Shadowbringers,PC,02-Jul-19,90,9.07,RPG,T
+-What Remains of Edith Finch,Switch,04-Jul-19,88,7.84,Adventure,T
+-Dragon Quest Builders 2,Switch,12-Jul-19,85,8.3,Sandbox,E
+-Tetris Effect,PC,23-Jul-19,90,6.57,Puzzle,E
+-Fire Emblem: Three Houses,Switch,26-Jul-19,89,8.83,Strategy,T
+-Astral Chain,Switch,30-Aug-19,87,9.04,Adventure,T
+-Divinity: Original Sin II - Definitive Edition,Switch,04-Sep-19,93,8.55,RPG,M
+-Star Wars Pinball,Switch,13-Sep-19,86,7.44,Pinball,E10+
+-AI: The Somnium Files,Switch,17-Sep-19,86,8.79,Adventure,M
+-The Legend of Zelda: Link`s Awakening,Switch,20-Sep-19,87,8.36,Open-World,E
+-Ori and the Blind Forest: Definitive Edition,Switch,27-Sep-19,90,8.56,Metroidvania,E
+-Dragon Quest XI S: Echoes of an Elusive Age - Definitive Edition,Switch,27-Sep-19,91,8.93,JRPG,T
+-Disco Elysium,PC,15-Oct-19,91,8.42,RPG,M
+-The Witcher 3: Wild Hunt - Complete Edition,Switch,15-Oct-19,85,8.5,ARPG,M
+-Tangle Tower,Switch,22-Oct-19,85,8.31,Adventure,T
+-Luigi`s Mansion 3,Switch,31-Oct-19,86,8.46,Adventure,E
+-Red Dead Redemption 2,PC,05-Nov-19,93,6.25,Open-World,M
+-Kentucky Route Zero: TV Edition,Switch,28-Jan-20,87,7.31,Adventure,T
+-Two Point Hospital,Switch,25-Feb-20,85,8.11,Tycoon,E10+
+-Animal Crossing: New Horizons,Switch,20-Mar-20,90,5.54,Virtual Life,E
+-Half-Life: Alyx,PC,23-Mar-20,93,9.2,FPS,M
+-Streets of Rage 4,Switch,30-Apr-20,87,8.59,Survival,T
+-Huntdown,Switch,12-May-20,86,8.53,Platformer,T
+-Super Mega Baseball 3,Switch,13-May-20,87,7.84,Sports,E
+-Bug Fables: The Everlasting Sapling,Switch,28-May-20,85,8.47,ARPG,E
+-Xenoblade Chronicles: Definitive Edition,Switch,29-May-20,89,8.96,ARPG,T
+-Heroes of Hammerwatch - Ultimate Edition,Switch,29-Jul-20,85,7.36,ARPG,T
+-Factorio,PC,14-Aug-20,91,9.13,Tycoon,E10+
+-Microsoft Flight Simulator,PC,18-Aug-20,91,7.22,Simulation,E
+-A Short Hike,Switch,18-Aug-20,88,8.68,Adventure,E
+-Crusader Kings III,PC,01-Sep-20,91,8.42,RTS,M
+-Ori and the Will of the Wisps,Switch,17-Sep-20,93,8.71,Metroidvania,E
+-Hades,PC,17-Sep-20,93,8.88,Roguelike,T
+-Hades,Switch,17-Sep-20,93,9.03,Roguelike,T
+-Spelunky 2,PC,29-Sep-20,91,6.75,Platformer,T
+-Pikmin 3 Deluxe,Switch,30-Oct-20,85,8.39,RTS,E10+
+-Demon`s Souls,PlayStation,11-Nov-20,92,8.05,ARPG,M
+-Grindstone,Switch,15-Dec-20,87,7.91,Puzzle,T
+-Super Mario 3D World + Bowser`s Fury,Switch,12-Feb-21,89,8.69,Platformer,E
+-Overcooked! All You Can Eat,Switch,23-Mar-21,88,7.48,Compilation,E
+-Tony Hawk`s Pro Skater 1 + 2,PlayStation,26-Mar-21,90,8.59,Sports,T
+-Monster Hunter Rise,Switch,26-Mar-21,88,9,ARPG,T
+-Disco Elysium: The Final Cut,PC,30-Mar-21,97,8.25,RPG,M
+-The House in Fata Morgana - Dreams of the Revenants Edition -,Switch,09-Apr-21,97,8.18,Visual Novels,M
+-Fez,Switch,14-Apr-21,88,6.91,Platformer,E
+-There is no game : Wrong dimension,Switch,14-Apr-21,87,7.99,Point-and-Click,E10+
+-Sumire,Switch,27-May-21,86,8.23,Adventure,E
+-Overboard!,Switch,02-Jun-21,86,8,Adventure,T
+-Final Fantasy VII Remake Intergrade,PlayStation,10-Jun-21,89,8.34,ARPG,T
+-Tony Hawk`s Pro Skater 1 + 2,Switch,25-Jun-21,85,6.98,Sports,T
+-Doki Doki Literature Club Plus!,Switch,30-Jun-21,85,8.31,Visual Novels,M
+-The Great Ace Attorney Chronicles,Switch,27-Jul-21,87,7.3,Compilation,T
+-Bustafellows,Switch,30-Jul-21,86,7.8,Visual Novels,M
+-Hades,PlayStation,13-Aug-21,93,8.66,Roguelike,T
+-Quake Remastered,Switch,19-Aug-21,87,8.18,FPS,M
+-Tetris Effect: Connected,Switch,08-Oct-21,95,8.46,Puzzle,E
+-Metroid Dread,Switch,08-Oct-21,89,8.82,Metroidvania,T
+-Disco Elysium: The Final Cut,Switch,12-Oct-21,87,8.68,RPG,M
+-Final Fantasy XIV: Endwalker,PlayStation,07-Dec-21,90,8.23,JRPG,T
+-God of War,PC,14-Jan-22,93,9.06,Adventure,M
+-Elden Ring,PC,25-Feb-22,94,8.04,ARPG,M
+-Elden Ring,PlayStation,25-Feb-22,96,7.97,ARPG,M
+-13 Sentinels: Aegis Rim,Switch,12-Apr-22,88,8.84,Adventure,T
+-The Stanley Parable: Ultra Deluxe,PC,27-Apr-22,90,8.29,Adventure,T
+-Neon White,Switch,16-Jun-22,88,8.07,FPS,T
+-Neon White,PC,16-Jun-22,89,8.43,FPS,T
+-Portal: Companion Collection,Switch,28-Jun-22,95,9.31,FPS,E10+
+-Cuphead in the Delicious Last Course,Switch,30-Jun-22,88,8.81,Platformer,E10+
+-I Was a Teenage Exocolonist,PC,25-Aug-22,91,7.9,Card Battle,T
+-The Legend of Heroes: Trails from Zero,PC,27-Sep-22,90,7.61,JRPG,T
+-Tunic,Switch,27-Sep-22,88,7.85,Open-World,E10+
+-NieR: Automata - The End of YoRHa Edition,Switch,06-Oct-22,89,7.46,ARPG,M
+-Persona 5 Royal,Switch,21-Oct-22,94,8.23,JRPG,M
+-Persona 5 Royal,PlayStation,21-Oct-22,91,8.56,JRPG,M
+-Persona 5 Royal,PC,21-Oct-22,95,8.61,JRPG,M
+-God of War: Ragnarok,PlayStation,09-Nov-22,94,8.05,Adventure,M
+-Atari 50: The Anniversary Celebration,Switch,11-Nov-22,89,7.86,Compilation,T
+-Chained Echoes,Switch,08-Dec-22,90,8.6,JRPG,M
+-Chained Echoes,PC,08-Dec-22,91,8.63,JRPG,M
+-The Witcher 3: Wild Hunt - Complete Edition,PlayStation,14-Dec-22,94,8.84,ARPG,M
+-Persona 4 Golden,Switch,19-Jan-23,90,8.67,JRPG,M
+-Hi-Fi Rush,PC,25-Jan-23,90,8.89,Platformer,T
+-Pizza Tower,PC,26-Jan-23,89,8.85,Platformer,T
+-Dead Space,PlayStation,27-Jan-23,89,8.65,Survival,M
+-Metroid Prime Remastered,Switch,08-Feb-23,94,8.82,FPS,T
+-Moss: Book II,PlayStation,22-Feb-23,90,7.32,Adventure,E10+
+-Tetris Effect: Connected,PlayStation,22-Feb-23,93,8.28,Puzzle,E
+-Resident Evil 4,PC,24-Mar-23,91,8.14,Survival,M
+-Resident Evil 4,PlayStation,24-Mar-23,93,8.09,Survival,M
+-Xenoblade Chronicles 3: Expansion Pass Wave 4 - Future Redeemed,Switch,25-Apr-23,92,9.07,ARPG,T
+-The Legend of Zelda: Tears of the Kingdom,Switch,12-May-23,96,8.43,Open-World,E10+
+-Street Fighter 6,PC,02-Jun-23,92,6.91,Fighting,T
+-Street Fighter 6,PlayStation,02-Jun-23,92,6.96,Fighting,T
+-Jack Jeanne,Switch,15-Jun-23,90,7.68,Visual Novel,T
+-Rogue Legacy 2,PlayStation,20-Jun-23,90,7.35,Roguelike,E10+
+-DAVE THE DIVER,PC,28-Jun-23,90,8.27,Adventure,E10+
+-DAVE THE DIVER,PlayStation,28-Jun-23,91,8.94,Adventure,E10+
+-Ghost Trick: Phantom Detective,PC,30-Jun-23,90,9.53,Adventure,T
+-Xenoblade Chronicles 3,Switch,29-Jul-23,89,8.55,ARPG,T
+-VIDEOVERSE,PC,07-Aug-23,90,6.82,Adventure,M
+-Vampire Survivors,Switch,17-Aug-23,88,8.33,Top-Down Shoot-`Em-Up,T
+-The Making of Karateka,Switch,29-Aug-23,90,7.44,Action,E10+
+-Sea of Stars,Switch,29-Aug-23,90,7.66,JRPG,E10+
+-Resident Evil 4: Separate Ways,PC,21-Sep-23,89,9.11,Survival,M
+-Cyberpunk 2077: Phantom Liberty,PC,26-Sep-23,89,7.36,ARPG,M
+-Cocoon,PlayStation,29-Sep-23,90,7.86,Adventure,T
+-Baldur`s Gate 3,PC,03-Oct-23,96,8.94,RPG,M
+-Baldur`s Gate 3,PlayStation,03-Oct-23,96,8.87,RPG,M
+-Marvel`s Spider-Man 2,PlayStation,20-Oct-23,90,8.85,Open-World,T
+-Super Mario Bros. Wonder,Switch,20-Oct-23,92,9.09,Platformer,E
+-Slay the Princess,PC,23-Oct-23,90,8.41,Visual Novel,M
+-DAVE THE DIVER,Switch,26-Oct-23,88,8.57,Adventure,E10+
+-Alan Wake II,PC,27-Oct-23,89,8.74,Survival,M
+-The Talos Principle 2,PlayStation,02-Nov-23,90,9.16,Adventure,E10+
+-Against the Storm,PC,08-Dec-23,91,8.2,Management,E10+
+-Prince of Persia: The Lost Crown,Switch,18-Jan-24,88,8.64,Metroidvania,T
+-The Last of Us Part II Remastered,PlayStation,19-Jan-24,90,8.2,Survival,M
+-Tekken 8,PC,26-Jan-24,91,6.04,Fighting,T
+-Tekken 8,PlayStation,26-Jan-24,90,7.49,Fighting,T
+-Like a Dragon: Infinite Wealth,PC,26-Jan-24,89,8.55,JRPG,M
+-Balatro,PC,20-Feb-24,90,8.6,Card Battle,M
+-Balatro,Switch,20-Feb-24,90,8.64,Card Battle,M
+-Balatro,PlayStation,20-Feb-24,93,8.58,Card Battle,M
+-Pentiment,Switch,22-Feb-24,90,8.82,Adventure,M
+-Final Fantasy VII Rebirth,PlayStation,29-Feb-24,92,9.03,JRPG,T
+-Unicorn Overlord,Switch,08-Mar-24,89,8.72,RTS,T
+-Black & White,PC,01-Mar-26,90,7.69,Strategy,T
+diff --git a/visualizer_preprocess.csv b/visualizer_preprocess.csv
+index 93c34d5..b1eda07 100644
+--- a/visualizer_preprocess.csv
++++ b/visualizer_preprocess.csv
+@@ -1,374 +1,374 @@
+ name,platform,release_date,meta_score,user_review,genre,target_age
+-Sid Meier`s Civilization II,PC,29-Feb-96,94,8.84,Strategy,K-A
+-Quake,PC,22-Jun-96,94,8.78,FPS,M
+-Diablo,PC,31-Dec-96,94,8.7,ARPG,M
+-Sid Meier`s Gettysburg!,PC,30-Sep-97,92,7.36,Strategy,K-A
+-Star Wars Jedi Knight: Dark Forces II,PC,09-Oct-97,91,8.57,FPS,T
+-Myth: The Fallen Lords,PC,31-Oct-97,91,8.47,Strategy,M
+-Grim Fandango,PC,14-Oct-98,94,9.09,Adventure,T
+-Half-Life,PC,19-Nov-98,96,9.08,FPS,M
+-Thief: The Dark Project,PC,30-Nov-98,92,8.97,Adventure,M
+-Baldur`s Gate,PC,21-Dec-98,91,8.93,RPG,T
+-Sid Meier`s Alpha Centauri,PC,12-Feb-99,92,8.81,Strategy,E
+-System Shock 2,PC,11-Aug-99,92,9.06,Survival,M
+-Homeworld,PC,31-Aug-99,93,8.8,RTS,E
+-FreeSpace 2,PC,30-Sep-99,91,8.69,Strategy,E
+-Age of Empires II: The Age of Kings,PC,30-Sep-99,92,9.07,RTS,T
+-Planescape: Torment,PC,14-Dec-99,91,9.18,RPG,T
+-The Sims,PC,04-Feb-00,92,7.86,Simulation,T
+-Baldur`s Gate II: Shadows of Amn,PC,24-Sep-00,95,9.14,RPG,T
+-NHL 2001,PC,28-Sep-00,90,6.52,Sports,E
+-Tony Hawk`s Pro Skater 2,PC,25-Oct-00,91,8.52,Sports,T
+-The Operative: No One Lives Forever,PC,11-Nov-00,91,8.66,FPS,M
+-The Longest Journey,PC,16-Nov-00,91,8.67,Point and Click,M
+-IL-2 Sturmovik,PC,18-Nov-01,91,8.65,Simulation,T
+-Medal of Honor: Allied Assault,PC,20-Jan-02,91,8.54,FPS,T
+-Grand Theft Auto III,PC,20-May-02,93,8.25,Open World,M
+-Neverwinter Nights,PC,16-Jun-02,91,8.18,RPG,T
+-Warcraft III: Reign of Chaos,PC,03-Jul-02,92,9.18,RTS,T
+-No One Lives Forever 2: A Spy in H.A.R.M.`s Way,PC,30-Sep-02,91,8.59,Adventure,M
+-Tiger Woods PGA Tour 2003,PC,31-Oct-02,92,5.01,Sports,E
+-Tom Clancy`s Splinter Cell,PC,19-Feb-03,91,8.5,Adventure,T
+-Grand Theft Auto: Vice City,PC,12-May-03,94,8.84,Open World,M
+-F1 Challenge `99-`02,PC,24-Jun-03,91,7.58,Racing,E
+-Madden NFL 2004,PC,12-Aug-03,91,7.08,Sports,E
+-Call of Duty,PC,29-Oct-03,91,8.36,FPS,T
+-Star Wars: Knights of the Old Republic,PC,18-Nov-03,93,8.96,RPG,T
+-Unreal Tournament 2004,PC,16-Mar-04,93,8.76,FPS,M
+-World Sports Winning Eleven 7 International,PC,09-Apr-04,92,6.92,Sports,E
+-The Sims 2,PC,14-Sep-04,90,8.72,Simulation,T
+-Tiger Woods PGA Tour 2005,PC,20-Sep-04,91,3.85,Sports,E
+-Rome: Total War,PC,22-Sep-04,92,8.95,RTS,T
++Sid Meier`s Civilization II,PC,29-Feb-96,94.3,8.8,Strategy,K-A
++Quake,PC,22-Jun-96,94.3,8.77,FPS,M
++Diablo,PC,31-Dec-96,93.8,8.69,ARPG,M
++Sid Meier`s Gettysburg!,PC,30-Sep-97,91.6,7.43,Strategy,K-A
++Star Wars Jedi Knight: Dark Forces II,PC,09-Oct-97,90.6,8.61,FPS,T
++Myth: The Fallen Lords,PC,31-Oct-97,90.7,8.47,Strategy,M
++Grim Fandango,PC,14-Oct-98,94,9.12,Adventure,T
++Half-Life,PC,19-Nov-98,95.9,9.05,FPS,M
++Thief: The Dark Project,PC,30-Nov-98,92.3,8.95,Adventure,M
++Baldur`s Gate,PC,21-Dec-98,91.3,8.88,RPG,T
++Sid Meier`s Alpha Centauri,PC,12-Feb-99,92.2,8.82,Strategy,E
++System Shock 2,PC,11-Aug-99,91.9,9.14,Survival,M
++Homeworld,PC,31-Aug-99,92.6,8.81,RTS,E
++FreeSpace 2,PC,30-Sep-99,91.2,8.66,Strategy,E
++Age of Empires II: The Age of Kings,PC,30-Sep-99,91.9,9.08,RTS,T
++Planescape: Torment,PC,14-Dec-99,91.1,9.17,RPG,T
++The Sims,PC,04-Feb-00,91.8,7.89,Simulation,T
++Baldur`s Gate II: Shadows of Amn,PC,24-Sep-00,94.5,9.06,RPG,T
++NHL 2001,PC,28-Sep-00,90,6.45,Sports,E
++Tony Hawk`s Pro Skater 2,PC,25-Oct-00,90.8,8.46,Sports,T
++The Operative: No One Lives Forever,PC,11-Nov-00,91.1,8.7,FPS,M
++The Longest Journey,PC,16-Nov-00,91.1,8.72,Point and Click,M
++IL-2 Sturmovik,PC,18-Nov-01,90.6,8.74,Simulation,T
++Medal of Honor: Allied Assault,PC,20-Jan-02,90.5,8.51,FPS,T
++Grand Theft Auto III,PC,20-May-02,93.1,8.22,Open World,M
++Neverwinter Nights,PC,16-Jun-02,90.6,8.2,RPG,T
++Warcraft III: Reign of Chaos,PC,03-Jul-02,91.8,9.24,RTS,T
++No One Lives Forever 2: A Spy in H.A.R.M.`s Way,PC,30-Sep-02,91.1,8.59,Adventure,M
++Tiger Woods PGA Tour 2003,PC,31-Oct-02,91.6,5.04,Sports,E
++Tom Clancy`s Splinter Cell,PC,19-Feb-03,90.7,8.51,Adventure,T
++Grand Theft Auto: Vice City,PC,12-May-03,93.6,8.83,Open World,M
++F1 Challenge `99-`02,PC,24-Jun-03,91,7.6,Racing,E
++Madden NFL 2004,PC,12-Aug-03,91,7.07,Sports,E
++Call of Duty,PC,29-Oct-03,90.8,8.44,FPS,T
++Star Wars: Knights of the Old Republic,PC,18-Nov-03,92.8,8.95,RPG,T
++Unreal Tournament 2004,PC,16-Mar-04,93.5,8.76,FPS,M
++World Sports Winning Eleven 7 International,PC,09-Apr-04,91.9,6.9,Sports,E
++The Sims 2,PC,14-Sep-04,89.7,8.73,Simulation,T
++Tiger Woods PGA Tour 2005,PC,20-Sep-04,91.4,3.8,Sports,E
++Rome: Total War,PC,22-Sep-04,92.4,8.98,RTS,T
+ Half-Life 2,PC,16-Nov-04,96,9.17,FPS,M
+-World of Warcraft,PC,23-Nov-04,93,7.36,RPG,T
++World of Warcraft,PC,23-Nov-04,93.3,7.43,RPG,T
+ Tom Clancy`s Splinter Cell: Chaos Theory,PC,28-Mar-05,92,8.67,Adventure,T
+-Grand Theft Auto: San Andreas,PC,07-Jun-05,93,8.92,Open World,M
+-Battlefield 2,PC,21-Jun-05,91,8.43,FPS,T
+-Sid Meier`s Civilization IV,PC,25-Oct-05,94,8.2,Strategy,E
+-The Elder Scrolls IV: Oblivion,PC,20-Mar-06,94,8.18,RPG,M
+-Company of Heroes,PC,13-Sep-06,93,8.67,RTS,M
+-World of Warcraft: The Burning Crusade,PC,16-Jan-07,91,6.7,RPG,T
+-Galactic Civilizations II: Dark Avatar,PC,14-Feb-07,91,7.77,Strategy,E
+-The Elder Scrolls IV: Oblivion,PlayStation,20-Mar-07,93,8.25,RPG,M
+-BioShock,PC,21-Aug-07,96,8.56,FPS,M
+-Team Fortress 2,PC,10-Oct-07,92,8.97,FPS,M
+-Portal,PC,10-Oct-07,90,9.21,FPS,T
+-The Orange Box,PC,10-Oct-07,96,9.33,FPS,M
+-Ratchet & Clank Future: Tools of Destruction,PlayStation,23-Oct-07,89,8.76,Platformer,E
+-Call of Duty 4: Modern Warfare,PlayStation,05-Nov-07,94,8.45,FPS,M
+-Call of Duty 4: Modern Warfare,PC,05-Nov-07,92,8.54,FPS,M
+-Crysis,PC,13-Nov-07,91,8.14,FPS,M
+-Uncharted: Drake`s Fortune,PlayStation,16-Nov-07,88,7.94,Adventure,T
+-Rock Band,PlayStation,20-Nov-07,92,8.08,Rhythm,T
+-The Orange Box,PlayStation,11-Dec-07,89,8.3,FPS,M
+-Burnout Paradise,PlayStation,22-Jan-08,87,7.73,Racing,E
+-Grand Theft Auto IV,PlayStation,29-Apr-08,98,7.71,Open World,M
+-Galactic Civilizations II: Twilight of the Arnor,PC,30-Apr-08,92,8.18,Strategy,E
+-GRID,PlayStation,03-Jun-08,87,8,Racing,E
+-Metal Gear Solid 4: Guns of the Patriots,PlayStation,12-Jun-08,94,8.79,Adventure,M
+-Bionic Commando Rearmed,PlayStation,14-Aug-08,87,7.9,Platformer,M
+-NHL 09,PlayStation,09-Sep-08,88,7.82,Sports,E
+-World of Goo,PC,12-Oct-08,90,8.39,Puzzle,E
+-FIFA Sports 09,PlayStation,13-Oct-08,87,7.46,Sports,E
+-Dead Space,PlayStation,13-Oct-08,88,8.81,Survival,M
+-Rock Band 2,PlayStation,19-Oct-08,91,7.99,Rhythm,T
+-BioShock,PlayStation,21-Oct-08,94,8.91,FPS,M
++Grand Theft Auto: San Andreas,PC,07-Jun-05,92.8,8.9,Open World,M
++Battlefield 2,PC,21-Jun-05,90.5,8.36,FPS,T
++Sid Meier`s Civilization IV,PC,25-Oct-05,93.5,8.22,Strategy,E
++The Elder Scrolls IV: Oblivion,PC,20-Mar-06,94.3,8.24,RPG,M
++Company of Heroes,PC,13-Sep-06,92.7,8.69,RTS,M
++World of Warcraft: The Burning Crusade,PC,16-Jan-07,90.8,6.7,RPG,T
++Galactic Civilizations II: Dark Avatar,PC,14-Feb-07,91.4,7.83,Strategy,E
++The Elder Scrolls IV: Oblivion,PlayStation,20-Mar-07,93.2,8.22,RPG,M
++BioShock,PC,21-Aug-07,95.8,8.55,FPS,M
++Team Fortress 2,PC,10-Oct-07,92.2,9.02,FPS,M
++Portal,PC,10-Oct-07,89.7,9.17,FPS,T
++The Orange Box,PC,10-Oct-07,95.5,9.25,FPS,M
++Ratchet & Clank Future: Tools of Destruction,PlayStation,23-Oct-07,88.9,8.77,Platformer,E
++Call of Duty 4: Modern Warfare,PlayStation,05-Nov-07,94,8.37,FPS,M
++Call of Duty 4: Modern Warfare,PC,05-Nov-07,92.4,8.45,FPS,M
++Crysis,PC,13-Nov-07,91.3,8.13,FPS,M
++Uncharted: Drake`s Fortune,PlayStation,16-Nov-07,87.9,7.89,Adventure,T
++Rock Band,PlayStation,20-Nov-07,91.9,8.11,Rhythm,T
++The Orange Box,PlayStation,11-Dec-07,88.8,8.27,FPS,M
++Burnout Paradise,PlayStation,22-Jan-08,86.7,7.75,Racing,E
++Grand Theft Auto IV,PlayStation,29-Apr-08,97.7,7.7,Open World,M
++Galactic Civilizations II: Twilight of the Arnor,PC,30-Apr-08,92.1,8.16,Strategy,E
++GRID,PlayStation,03-Jun-08,86.7,8.04,Racing,E
++Metal Gear Solid 4: Guns of the Patriots,PlayStation,12-Jun-08,94.1,8.76,Adventure,M
++Bionic Commando Rearmed,PlayStation,14-Aug-08,86.5,7.95,Platformer,M
++NHL 09,PlayStation,09-Sep-08,88,7.77,Sports,E
++World of Goo,PC,12-Oct-08,90.5,8.43,Puzzle,E
++FIFA Sports 09,PlayStation,13-Oct-08,87.4,7.55,Sports,E
++Dead Space,PlayStation,13-Oct-08,87.8,8.81,Survival,M
++Rock Band 2,PlayStation,19-Oct-08,91.2,8.01,Rhythm,T
++BioShock,PlayStation,21-Oct-08,94.3,8.91,FPS,M
+ LittleBigPlanet,PlayStation,27-Oct-08,95,6.8,Platformer,E
+-Fallout 3,PC,28-Oct-08,91,7.84,RPG,M
+-Fallout 3,PlayStation,28-Oct-08,90,7.92,RPG,M
+-World of Warcraft: Wrath of the Lich King,PC,13-Nov-08,91,7.94,RPG,T
+-Super Street Fighter II Turbo HD Remix,PlayStation,25-Nov-08,87,7.62,Fighting,T
+-Street Fighter IV,PlayStation,17-Feb-09,94,7.39,Fighting,T
+-Killzone 2,PlayStation,27-Feb-09,91,8.08,FPS,M
+-MLB 09: The Show,PlayStation,03-Mar-09,90,8.1,Sports,E
+-Fight Night Round 4,PlayStation,23-Jun-09,88,7.56,Sports,T
+-BlazBlue: Calamity Trigger,PlayStation,30-Jun-09,87,8.46,Fighting,T
+-Street Fighter IV,PC,01-Jul-09,91,7.75,Fighting,T
+-Wipeout HD Fury,PlayStation,23-Jul-09,89,8.22,Racing,E
+-Batman: Arkham Asylum,PlayStation,25-Aug-09,91,8.81,Adventure,T
+-DiRT 2,PlayStation,08-Sep-09,87,8.22,Racing,T
+-The Beatles: Rock Band,PlayStation,09-Sep-09,88,8.24,Rhythm,T
+-NHL 10,PlayStation,15-Sep-09,88,8.09,Sports,E
+-Batman: Arkham Asylum,PC,15-Sep-09,91,8.55,Adventure,T
+-Demon`s Souls,PlayStation,06-Oct-09,89,8.71,RPG,M
+-Critter Crunch,PlayStation,08-Oct-09,87,7.3,Puzzle,E
+-Uncharted 2: Among Thieves,PlayStation,13-Oct-09,96,8.8,Adventure,T
+-FIFA Sports 10,PlayStation,20-Oct-09,91,7.57,Sports,E
+-Dragon Age: Origins,PlayStation,03-Nov-09,87,8.05,RPG,M
+-Dragon Age: Origins,PC,03-Nov-09,91,8.78,RPG,M
+-Call of Duty: Modern Warfare 2,PlayStation,10-Nov-09,94,6.6,FPS,M
+-Braid,PlayStation,12-Nov-09,93,7.76,Platformer,E
+-Assassin`s Creed II,PlayStation,17-Nov-09,91,8.67,Open World,M
+-God of War Collection,PlayStation,17-Nov-09,91,8.83,Adventure,M
+-Peggle,PlayStation,19-Nov-09,91,7.3,Puzzle,E
+-Mass Effect 2,PC,26-Jan-10,94,8.93,RPG,M
+-BioShock 2,PlayStation,09-Feb-10,88,8.2,FPS,M
+-Heavy Rain,PlayStation,23-Feb-10,87,7.83,Adventure,M
+-MLB 10: The Show,PlayStation,02-Mar-10,91,8.15,Sports,E
+-Battlefield: Bad Company 2,PlayStation,02-Mar-10,88,8.55,FPS,M
+-God of War III,PlayStation,16-Mar-10,92,8.77,Adventure,M
+-Super Street Fighter IV,PlayStation,27-Apr-10,92,7.81,Fighting,T
+-Red Dead Redemption,PlayStation,18-May-10,95,8.92,Open World,M
+-Monkey Island 2 Special Edition: LeChuck`s Revenge,PlayStation,06-Jul-10,87,8.11,Point and Click,E
+-BlazBlue: Continuum Shift,PlayStation,27-Jul-10,87,8.06,Fighting,T
+-Starcraft II: Wings of Liberty,PC,27-Jul-10,93,8.32,RTS,T
+-NHL 11,PlayStation,07-Sep-10,88,7.16,Sports,E
+-FIFA Sports 11,PlayStation,28-Sep-10,89,8.07,Sports,E
+-NBA 2K11,PlayStation,05-Oct-10,89,7.96,Sports,E
+-Rock Band 3,PlayStation,26-Oct-10,91,8.1,Rhythm,T
+-Red Dead Redemption: Undead Nightmare Pack,PlayStation,26-Oct-10,87,8.31,Open World,M
+-Call of Duty: Black Ops,PlayStation,09-Nov-10,88,6.82,FPS,M
+-Need for Speed: Hot Pursuit,PlayStation,16-Nov-10,89,7.37,Racing,E
+-Assassin`s Creed: Brotherhood,PlayStation,16-Nov-10,90,8.27,Open World,M
+-Pac-Man Championship Edition DX,PlayStation,23-Nov-10,91,7.87,Arcade,E
+-World of Warcraft: Cataclysm,PC,07-Dec-10,90,5.77,RPG,M
+-Battlefield: Bad Company 2 Vietnam,PlayStation,21-Dec-10,88,8.25,FPS,M
+-Mass Effect 2,PlayStation,17-Jan-11,94,8.66,RPG,M
+-LittleBigPlanet 2,PlayStation,18-Jan-11,91,8.58,Platformer,E
+-Dead Space 2,PlayStation,25-Jan-11,89,8.5,Survival,M
+-MLB 11: The Show,PlayStation,08-Mar-11,90,7.98,Sports,E
+-Portal 2,PC,18-Apr-11,95,9.14,FPS,T
+-Portal 2,PlayStation,19-Apr-11,95,8.73,FPS,T
+-L.A. Noire,PlayStation,17-May-11,89,7.8,Open World,M
+-DiRT 3,PlayStation,24-May-11,87,7.23,Racing,T
+-LIMBO,PlayStation,19-Jul-11,90,8,Platformer,T
+-Deus Ex: Human Revolution,PlayStation,23-Aug-11,89,8.28,Adventure,M
+-FIFA Sports 12,PlayStation,27-Sep-11,90,7.17,Sports,E
+-The ICO & Shadow of the Colossus Collection,PlayStation,27-Sep-11,92,8.73,Adventure,T
+-NBA 2K12,PlayStation,04-Oct-11,90,6.81,Sports,E
+-Dark Souls,PlayStation,04-Oct-11,89,8.88,RPG,M
+-Batman: Arkham City,PlayStation,18-Oct-11,96,8.78,Adventure,T
+-Uncharted 3: Drake`s Deception,PlayStation,01-Nov-11,92,8.44,Adventure,T
+-Call of Duty: Modern Warfare 3,PlayStation,08-Nov-11,88,3.31,FPS,M
+-Metal Gear Solid HD Collection,PlayStation,08-Nov-11,89,8.94,Adventure,M
+-The Elder Scrolls V: Skyrim,PC,10-Nov-11,94,8.42,RPG,M
+-The Elder Scrolls V: Skyrim,PlayStation,11-Nov-11,92,6.59,RPG,M
+-Rayman Origins,PlayStation,15-Nov-11,87,8.53,Platformer,T
+-Minecraft,PC,18-Nov-11,93,8.03,Sandbox,E
+-Batman: Arkham City,PC,21-Nov-11,91,8.65,Adventure,T
+-Mass Effect 3,PlayStation,05-Mar-12,93,5.76,RPG,M
+-Journey,PlayStation,13-Mar-12,92,8.76,Platformer,E
+-Max Payne 3,PlayStation,15-May-12,87,7.9,TPS,M
+-The Walking Dead: Episode 3 - Long Road Ahead,PlayStation,28-Aug-12,87,7.91,Point and Click,M
+-Borderlands 2,PlayStation,18-Sep-12,91,8.16,FPS,M
+-FIFA Sports 13,PlayStation,25-Sep-12,88,6.55,Sports,E
+-NBA 2K13,PlayStation,02-Oct-12,90,8.03,Sports,E
+-Dishonored,PC,08-Oct-12,91,8.54,Adventure,M
+-Dishonored,PlayStation,09-Oct-12,89,7.93,Adventure,M
+-XCOM: Enemy Unknown,PlayStation,09-Oct-12,89,8.25,Strategy,M
+-Mark of the Ninja,PC,16-Oct-12,91,7.99,Platformer,M
+-Okami HD,PlayStation,30-Oct-12,90,9.03,Adventure,T
+-The Walking Dead: Episode 5 - No Time Left,PlayStation,20-Nov-12,88,8.7,Point and Click,M
+-Far Cry 3,PlayStation,04-Dec-12,90,8.6,FPS,M
+-MLB 13: The Show,PlayStation,05-Mar-13,87,7.89,Sports,E
++Fallout 3,PC,28-Oct-08,90.7,7.83,RPG,M
++Fallout 3,PlayStation,28-Oct-08,90.3,7.94,RPG,M
++World of Warcraft: Wrath of the Lich King,PC,13-Nov-08,90.7,7.86,RPG,T
++Super Street Fighter II Turbo HD Remix,PlayStation,25-Nov-08,87,7.58,Fighting,T
++Street Fighter IV,PlayStation,17-Feb-09,93.6,7.35,Fighting,T
++Killzone 2,PlayStation,27-Feb-09,90.5,8.07,FPS,M
++MLB 09: The Show,PlayStation,03-Mar-09,90,8.12,Sports,E
++Fight Night Round 4,PlayStation,23-Jun-09,88.3,7.57,Sports,T
++BlazBlue: Calamity Trigger,PlayStation,30-Jun-09,87.1,8.49,Fighting,T
++Street Fighter IV,PC,01-Jul-09,90.9,7.85,Fighting,T
++Wipeout HD Fury,PlayStation,23-Jul-09,88.9,8.24,Racing,E
++Batman: Arkham Asylum,PlayStation,25-Aug-09,90.9,8.78,Adventure,T
++DiRT 2,PlayStation,08-Sep-09,87.2,8.21,Racing,T
++The Beatles: Rock Band,PlayStation,09-Sep-09,88,8.15,Rhythm,T
++NHL 10,PlayStation,15-Sep-09,87.9,8.07,Sports,E
++Batman: Arkham Asylum,PC,15-Sep-09,91.1,8.63,Adventure,T
++Demon`s Souls,PlayStation,06-Oct-09,89.2,8.72,RPG,M
++Critter Crunch,PlayStation,08-Oct-09,87.3,7.27,Puzzle,E
++Uncharted 2: Among Thieves,PlayStation,13-Oct-09,96.1,8.77,Adventure,T
++FIFA Sports 10,PlayStation,20-Oct-09,91.3,7.63,Sports,E
++Dragon Age: Origins,PlayStation,03-Nov-09,86.6,8.02,RPG,M
++Dragon Age: Origins,PC,03-Nov-09,90.8,8.82,RPG,M
++Call of Duty: Modern Warfare 2,PlayStation,10-Nov-09,94.4,6.61,FPS,M
++Braid,PlayStation,12-Nov-09,92.8,7.85,Platformer,E
++Assassin`s Creed II,PlayStation,17-Nov-09,90.6,8.71,Open World,M
++God of War Collection,PlayStation,17-Nov-09,91.5,8.78,Adventure,M
++Peggle,PlayStation,19-Nov-09,91.1,7.33,Puzzle,E
++Mass Effect 2,PC,26-Jan-10,93.8,8.89,RPG,M
++BioShock 2,PlayStation,09-Feb-10,87.7,8.17,FPS,M
++Heavy Rain,PlayStation,23-Feb-10,87.5,7.84,Adventure,M
++MLB 10: The Show,PlayStation,02-Mar-10,90.6,8.23,Sports,E
++Battlefield: Bad Company 2,PlayStation,02-Mar-10,88.2,8.46,FPS,M
++God of War III,PlayStation,16-Mar-10,92.5,8.83,Adventure,M
++Super Street Fighter IV,PlayStation,27-Apr-10,92.1,7.84,Fighting,T
++Red Dead Redemption,PlayStation,18-May-10,95.2,8.91,Open World,M
++Monkey Island 2 Special Edition: LeChuck`s Revenge,PlayStation,06-Jul-10,87,8.09,Point and Click,E
++BlazBlue: Continuum Shift,PlayStation,27-Jul-10,86.7,8.11,Fighting,T
++Starcraft II: Wings of Liberty,PC,27-Jul-10,92.9,8.31,RTS,T
++NHL 11,PlayStation,07-Sep-10,87.9,7.21,Sports,E
++FIFA Sports 11,PlayStation,28-Sep-10,88.9,8.12,Sports,E
++NBA 2K11,PlayStation,05-Oct-10,89,7.99,Sports,E
++Rock Band 3,PlayStation,26-Oct-10,90.6,8.08,Rhythm,T
++Red Dead Redemption: Undead Nightmare Pack,PlayStation,26-Oct-10,87.1,8.3,Open World,M
++Call of Duty: Black Ops,PlayStation,09-Nov-10,88.3,6.84,FPS,M
++Need for Speed: Hot Pursuit,PlayStation,16-Nov-10,89.2,7.39,Racing,E
++Assassin`s Creed: Brotherhood,PlayStation,16-Nov-10,89.9,8.27,Open World,M
++Pac-Man Championship Edition DX,PlayStation,23-Nov-10,90.7,7.89,Arcade,E
++World of Warcraft: Cataclysm,PC,07-Dec-10,90,5.78,RPG,M
++Battlefield: Bad Company 2 Vietnam,PlayStation,21-Dec-10,88.2,8.22,FPS,M
++Mass Effect 2,PlayStation,17-Jan-11,94.4,8.72,RPG,M
++LittleBigPlanet 2,PlayStation,18-Jan-11,90.6,8.56,Platformer,E
++Dead Space 2,PlayStation,25-Jan-11,88.8,8.49,Survival,M
++MLB 11: The Show,PlayStation,08-Mar-11,90.1,8,Sports,E
++Portal 2,PC,18-Apr-11,95.2,9.11,FPS,T
++Portal 2,PlayStation,19-Apr-11,95.3,8.75,FPS,T
++L.A. Noire,PlayStation,17-May-11,89.2,7.79,Open World,M
++DiRT 3,PlayStation,24-May-11,87.1,7.17,Racing,T
++LIMBO,PlayStation,19-Jul-11,89.9,8.04,Platformer,T
++Deus Ex: Human Revolution,PlayStation,23-Aug-11,88.8,8.3,Adventure,M
++FIFA Sports 12,PlayStation,27-Sep-11,90.3,7.16,Sports,E
++The ICO & Shadow of the Colossus Collection,PlayStation,27-Sep-11,92.1,8.7,Adventure,T
++NBA 2K12,PlayStation,04-Oct-11,90.4,6.8,Sports,E
++Dark Souls,PlayStation,04-Oct-11,88.6,8.86,RPG,M
++Batman: Arkham City,PlayStation,18-Oct-11,95.5,8.84,Adventure,T
++Uncharted 3: Drake`s Deception,PlayStation,01-Nov-11,91.5,8.41,Adventure,T
++Call of Duty: Modern Warfare 3,PlayStation,08-Nov-11,87.6,3.28,FPS,M
++Metal Gear Solid HD Collection,PlayStation,08-Nov-11,89.2,8.92,Adventure,M
++The Elder Scrolls V: Skyrim,PC,10-Nov-11,94,8.39,RPG,M
++The Elder Scrolls V: Skyrim,PlayStation,11-Nov-11,91.8,6.6,RPG,M
++Rayman Origins,PlayStation,15-Nov-11,87.3,8.52,Platformer,T
++Minecraft,PC,18-Nov-11,93.1,7.99,Sandbox,E
++Batman: Arkham City,PC,21-Nov-11,90.9,8.68,Adventure,T
++Mass Effect 3,PlayStation,05-Mar-12,93.5,5.82,RPG,M
++Journey,PlayStation,13-Mar-12,91.6,8.78,Platformer,E
++Max Payne 3,PlayStation,15-May-12,87.3,7.9,TPS,M
++The Walking Dead: Episode 3 - Long Road Ahead,PlayStation,28-Aug-12,86.8,7.91,Point and Click,M
++Borderlands 2,PlayStation,18-Sep-12,90.7,8.24,FPS,M
++FIFA Sports 13,PlayStation,25-Sep-12,88,6.63,Sports,E
++NBA 2K13,PlayStation,02-Oct-12,89.9,8.03,Sports,E
++Dishonored,PC,08-Oct-12,90.7,8.49,Adventure,M
++Dishonored,PlayStation,09-Oct-12,89.2,7.95,Adventure,M
++XCOM: Enemy Unknown,PlayStation,09-Oct-12,89.5,8.2,Strategy,M
++Mark of the Ninja,PC,16-Oct-12,90.7,7.97,Platformer,M
++Okami HD,PlayStation,30-Oct-12,89.5,9,Adventure,T
++The Walking Dead: Episode 5 - No Time Left,PlayStation,20-Nov-12,88.3,8.71,Point and Click,M
++Far Cry 3,PlayStation,04-Dec-12,89.6,8.65,FPS,M
++MLB 13: The Show,PlayStation,05-Mar-13,87.1,7.91,Sports,E
+ Tomb Raider,PlayStation,05-Mar-13,87,8.27,Adventure,M
+-BioShock Infinite,PC,25-Mar-13,94,8.62,FPS,M
+-BioShock Infinite,PlayStation,26-Mar-13,94,8.45,FPS,M
+-Fez,PC,01-May-13,91,6.7,Platformer,E
+-The Last of Us,PlayStation,14-Jun-13,95,9.25,Adventure,E
+-Hotline Miami,PlayStation,25-Jun-13,87,8.3,Adventure,M
+-Spelunky,PC,08-Aug-13,90,7.35,Platformer,T
+-Rayman Legends,PlayStation,03-Sep-13,91,8.68,Platformer,E
+-Grand Theft Auto V,PlayStation,17-Sep-13,97,8.31,Open World,M
+-Assassin`s Creed IV: Black Flag,PlayStation,29-Oct-13,88,8.23,Open World,M
+-The Last of Us: Left Behind,PlayStation,14-Feb-14,88,4.66,Adventure,E
+-Dark Souls II,PlayStation,11-Mar-14,91,8.13,RPG,T
+-Dark Souls II,PC,25-Apr-14,91,7.25,RPG,T
+-Kentucky Route Zero - Act III,PC,06-May-14,91,6.61,Adventure,E
+-The Walking Dead: Season Two Episode 5 - No Going Back,PlayStation,26-Aug-14,87,8.14,Point and Click,M
+-Grand Theft Auto V,PC,13-Apr-15,96,7.81,Open World,M
+-The Witcher 3: Wild Hunt,PC,18-May-15,93,9.41,RPG,M
+-Metal Gear Solid V: The Phantom Pain,PC,01-Sep-15,91,7.83,Open World,M
+-Undertale,PC,15-Sep-15,92,8.43,JRPG,E
+-Out of the Park Baseball 17,PC,22-Mar-16,92,3.31,Sports,E
+-Stephen`s Sausage Roll,PC,18-Apr-16,90,5.5,Puzzle,E
+-Overwatch,PC,23-May-16,91,6.53,FPS,T
+-The Witcher 3: Wild Hunt - Blood and Wine,PC,30-May-16,92,9.28,RPG,M
+-Shovel Knight: Treasure Trove,Switch,03-Mar-17,91,8.17,Platformer,E
+-The Legend of Zelda: Breath of the Wild,Switch,03-Mar-17,97,8.67,Open World,E
+-The Binding of Isaac: Afterbirth +,Switch,17-Mar-17,85,8.29,Top-Down Shoot-`Em-Up,M
+-Mario Kart 8 Deluxe,Switch,28-Apr-17,92,8.61,Racing,E
+-Thumper,Switch,18-May-17,85,8.08,Rhythm,E
+-Cave Story +,Switch,20-Jun-17,88,7.86,Metroidvania,E
+-Sonic Mania,Switch,15-Aug-17,86,8.43,Platformer,E
+-Divinity: Original Sin II,PC,14-Sep-17,93,8.83,RPG,E
+-SteamWorld Dig 2,Switch,21-Sep-17,88,8.57,Metroidvania,E
+-Axiom Verge,Switch,05-Oct-17,87,8.37,Metroidvania,E
+-Stardew Valley,Switch,05-Oct-17,87,8.66,RPG,E
+-Super Mario Odyssey,Switch,27-Oct-17,97,8.93,Platformer,E
+-Rocket League,Switch,14-Nov-17,86,7.77,Sports,E
+-Okami HD,PC,12-Dec-17,92,7.87,Adventure,T
+-Enter the Gungeon,Switch,14-Dec-17,87,8.03,Top-Down Shoot-`Em-Up,T
+-SteamWorld Heist: Ultimate Edition,Switch,28-Dec-17,91,8.27,Strategy,E
+-Celeste,Switch,25-Jan-18,92,8.58,Platformer,E
++BioShock Infinite,PC,25-Mar-13,93.7,8.65,FPS,M
++BioShock Infinite,PlayStation,26-Mar-13,93.7,8.46,FPS,M
++Fez,PC,01-May-13,91.5,6.73,Platformer,E
++The Last of Us,PlayStation,14-Jun-13,94.7,9.24,Adventure,E
++Hotline Miami,PlayStation,25-Jun-13,86.6,8.31,Adventure,M
++Spelunky,PC,08-Aug-13,89.9,7.37,Platformer,T
++Rayman Legends,PlayStation,03-Sep-13,91.2,8.74,Platformer,E
++Grand Theft Auto V,PlayStation,17-Sep-13,96.7,8.31,Open World,M
++Assassin`s Creed IV: Black Flag,PlayStation,29-Oct-13,87.7,8.17,Open World,M
++The Last of Us: Left Behind,PlayStation,14-Feb-14,87.6,4.66,Adventure,E
++Dark Souls II,PlayStation,11-Mar-14,91.5,8.07,RPG,T
++Dark Souls II,PC,25-Apr-14,91.1,7.2,RPG,T
++Kentucky Route Zero - Act III,PC,06-May-14,90.8,6.58,Adventure,E
++The Walking Dead: Season Two Episode 5 - No Going Back,PlayStation,26-Aug-14,87.1,8.06,Point and Click,M
++Grand Theft Auto V,PC,13-Apr-15,95.7,7.76,Open World,M
++The Witcher 3: Wild Hunt,PC,18-May-15,92.5,9.43,RPG,M
++Metal Gear Solid V: The Phantom Pain,PC,01-Sep-15,90.6,7.83,Open World,M
++Undertale,PC,15-Sep-15,91.6,8.44,JRPG,E
++Out of the Park Baseball 17,PC,22-Mar-16,92,3.33,Sports,E
++Stephen`s Sausage Roll,PC,18-Apr-16,89.9,5.45,Puzzle,E
++Overwatch,PC,23-May-16,91.5,6.48,FPS,T
++The Witcher 3: Wild Hunt - Blood and Wine,PC,30-May-16,92,9.26,RPG,M
++Shovel Knight: Treasure Trove,Switch,03-Mar-17,91.1,8.19,Platformer,E
++The Legend of Zelda: Breath of the Wild,Switch,03-Mar-17,96.8,8.65,Open World,E
++The Binding of Isaac: Afterbirth +,Switch,17-Mar-17,84.6,8.25,Top-Down Shoot-`Em-Up,M
++Mario Kart 8 Deluxe,Switch,28-Apr-17,92.3,8.6,Racing,E
++Thumper,Switch,18-May-17,85.2,8.05,Rhythm,E
++Cave Story +,Switch,20-Jun-17,87.5,7.9,Metroidvania,E
++Sonic Mania,Switch,15-Aug-17,85.8,8.41,Platformer,E
++Divinity: Original Sin II,PC,14-Sep-17,93.2,8.8,RPG,E
++SteamWorld Dig 2,Switch,21-Sep-17,88.2,8.6,Metroidvania,E
++Axiom Verge,Switch,05-Oct-17,87.3,8.39,Metroidvania,E
++Stardew Valley,Switch,05-Oct-17,86.5,8.7,RPG,E
++Super Mario Odyssey,Switch,27-Oct-17,96.6,8.95,Platformer,E
++Rocket League,Switch,14-Nov-17,85.7,7.78,Sports,E
++Okami HD,PC,12-Dec-17,92,7.89,Adventure,T
++Enter the Gungeon,Switch,14-Dec-17,87.2,7.97,Top-Down Shoot-`Em-Up,T
++SteamWorld Heist: Ultimate Edition,Switch,28-Dec-17,90.9,8.28,Strategy,E
++Celeste,Switch,25-Jan-18,91.8,8.61,Platformer,E
+ Crypt of the NecroDancer: Nintendo Switch Edition,Switch,01-Feb-18,86,7.2,Rhythm,E
+-Night in the Woods,Switch,01-Feb-18,85,7.5,Adventure,E
+-Owlboy,Switch,13-Feb-18,87,7.28,Adventure,E
+-Bayonetta 2,Switch,16-Feb-18,92,8.52,Adventure,M
+-Bayonetta + Bayonetta 2,Switch,16-Feb-18,90,8.7,Adventure,M
+-Shantae and the Pirate`s Curse,Switch,20-Mar-18,86,8.29,Platformer,E
+-Donkey Kong Country: Tropical Freeze,Switch,04-May-18,86,8.61,Platformer,E
+-Ikaruga,Switch,29-May-18,88,7.73,Arcade,E
+-West of Loathing,Switch,31-May-18,85,8.15,RPG,T
+-Hollow Knight,Switch,12-Jun-18,90,8.99,Metroidvania,E
+-Minecraft,Switch,21-Jun-18,86,7.54,Sandbox,E
+-INSIDE,Switch,28-Jun-18,91,8.55,Platformer,M
+-Sonic Mania Plus,Switch,17-Jul-18,91,8.09,Platformer,E
+-Iconoclasts,Switch,02-Aug-18,87,7.9,Metroidvania,T
+-Dead Cells,Switch,07-Aug-18,89,8.43,Metroidvania,T
+-Okami HD,Switch,09-Aug-18,89,8.61,Adventure,T
+-Into the Breach,Switch,28-Aug-18,89,7.84,Strategy,E
+-The Messenger,Switch,30-Aug-18,86,8.4,Metroidvania,E
+-Mini Metro,Switch,30-Aug-18,86,8.38,Management,E
+-Hyper Light Drifter,Switch,06-Sep-18,88,7.69,ARPG,T
+-Bastion,Switch,13-Sep-18,90,7.71,ARPG,E
+-Undertale,Switch,18-Sep-18,93,8.15,JRPG,E
+-Velocity 2X,Switch,20-Sep-18,87,8,Top-Down Shoot-`Em-Up,E
+-Dragon Ball FighterZ,Switch,28-Sep-18,87,7.77,Fighting,T
+-Guacamelee! Super Turbo Championship Edition,Switch,08-Oct-18,86,8.04,Metroidvania,E
+-Transistor,Switch,01-Nov-18,86,8.24,ARPG,T
+-Diablo III: Eternal Collection,Switch,02-Nov-18,88,7.51,ARPG,M
+-Sid Meier`s Civilization VI,Switch,16-Nov-18,86,7.65,Strategy,E
+-Warframe,Switch,20-Nov-18,86,8.3,TPS,M
+-Monster Boy and the Cursed Kingdom,Switch,04-Dec-18,86,8.29,Metroidvania,E
+-Katamari Damacy REROLL,Switch,07-Dec-18,87,8.26,Adventure,E
+-Super Smash Bros. Ultimate,Switch,07-Dec-18,93,8.56,Fighting,E
+-Guacamelee! 2,Switch,10-Dec-18,87,8.3,Metroidvania,E
+-Downwell,Switch,31-Jan-19,88,7.3,ARPG,E
+-BlazBlue: Central Fiction - Special Edition,Switch,07-Feb-19,86,8.51,Fighting,T
++Night in the Woods,Switch,01-Feb-18,85.4,7.5,Adventure,E
++Owlboy,Switch,13-Feb-18,86.8,7.32,Adventure,E
++Bayonetta 2,Switch,16-Feb-18,92.2,8.54,Adventure,M
++Bayonetta + Bayonetta 2,Switch,16-Feb-18,89.8,8.69,Adventure,M
++Shantae and the Pirate`s Curse,Switch,20-Mar-18,86.1,8.26,Platformer,E
++Donkey Kong Country: Tropical Freeze,Switch,04-May-18,85.7,8.55,Platformer,E
++Ikaruga,Switch,29-May-18,87.8,7.73,Arcade,E
++West of Loathing,Switch,31-May-18,84.9,8.06,RPG,T
++Hollow Knight,Switch,12-Jun-18,89.8,9.01,Metroidvania,E
++Minecraft,Switch,21-Jun-18,85.7,7.52,Sandbox,E
++INSIDE,Switch,28-Jun-18,90.9,8.6,Platformer,M
++Sonic Mania Plus,Switch,17-Jul-18,91.4,8.13,Platformer,E
++Iconoclasts,Switch,02-Aug-18,87.2,7.91,Metroidvania,T
++Dead Cells,Switch,07-Aug-18,89.1,8.39,Metroidvania,T
++Okami HD,Switch,09-Aug-18,89,8.63,Adventure,T
++Into the Breach,Switch,28-Aug-18,88.6,7.83,Strategy,E
++The Messenger,Switch,30-Aug-18,85.9,8.41,Metroidvania,E
++Mini Metro,Switch,30-Aug-18,86.2,8.43,Management,E
++Hyper Light Drifter,Switch,06-Sep-18,87.7,7.72,ARPG,T
++Bastion,Switch,13-Sep-18,90,7.67,ARPG,E
++Undertale,Switch,18-Sep-18,93.4,8.21,JRPG,E
++Velocity 2X,Switch,20-Sep-18,87.5,7.99,Top-Down Shoot-`Em-Up,E
++Dragon Ball FighterZ,Switch,28-Sep-18,86.8,7.85,Fighting,T
++Guacamelee! Super Turbo Championship Edition,Switch,08-Oct-18,85.8,8.02,Metroidvania,E
++Transistor,Switch,01-Nov-18,86.4,8.24,ARPG,T
++Diablo III: Eternal Collection,Switch,02-Nov-18,87.7,7.52,ARPG,M
++Sid Meier`s Civilization VI,Switch,16-Nov-18,86.4,7.56,Strategy,E
++Warframe,Switch,20-Nov-18,85.8,8.31,TPS,M
++Monster Boy and the Cursed Kingdom,Switch,04-Dec-18,86.5,8.27,Metroidvania,E
++Katamari Damacy REROLL,Switch,07-Dec-18,87.1,8.31,Adventure,E
++Super Smash Bros. Ultimate,Switch,07-Dec-18,93.3,8.55,Fighting,E
++Guacamelee! 2,Switch,10-Dec-18,87.3,8.25,Metroidvania,E
++Downwell,Switch,31-Jan-19,88.1,7.31,ARPG,E
++BlazBlue: Central Fiction - Special Edition,Switch,07-Feb-19,85.6,8.55,Fighting,T
+ Steins;Gate Elite,Switch,19-Feb-19,85,7.89,Visual Novel,M
+-Assault Android Cactus+,Switch,08-Mar-19,86,8.43,Top-Down Shoot-`Em-Up,E
+-Blaster Master Zero II,Switch,20-Mar-19,85,8.47,Top-Down Shoot-`Em-Up,E
+-Cuphead,Switch,17-Apr-19,87,8.41,Platformer,E
+-Final Fantasy XII: The Zodiac Age,Switch,30-Apr-19,85,8.58,JRPG,T
+-Beat Saber,PC,21-May-19,93,8.41,Rhythm,E
+-Slay the Spire,Switch,06-Jun-19,85,8.26,Card Battle,E
+-Cadence of Hyrule: Crypt of the NecroDancer Featuring The Legend of Zelda,Switch,13-Jun-19,85,8.09,Rhythm,E
+-Super Mario Maker 2,Switch,28-Jun-19,88,8.55,Platformer,E
+-Final Fantasy XIV: Shadowbringers,PC,02-Jul-19,90,9.07,RPG,T
+-What Remains of Edith Finch,Switch,04-Jul-19,88,7.84,Adventure,T
+-Dragon Quest Builders 2,Switch,12-Jul-19,85,8.3,Sandbox,E
+-Tetris Effect,PC,23-Jul-19,90,6.57,Puzzle,E
+-Fire Emblem: Three Houses,Switch,26-Jul-19,89,8.83,Strategy,T
+-Astral Chain,Switch,30-Aug-19,87,9.04,Adventure,T
+-Divinity: Original Sin II - Definitive Edition,Switch,04-Sep-19,93,8.55,RPG,M
+-Star Wars Pinball,Switch,13-Sep-19,86,7.44,Pinball,E10+
+-AI: The Somnium Files,Switch,17-Sep-19,86,8.79,Adventure,M
+-The Legend of Zelda: Link`s Awakening,Switch,20-Sep-19,87,8.36,Open-World,E
+-Ori and the Blind Forest: Definitive Edition,Switch,27-Sep-19,90,8.56,Metroidvania,E
+-Dragon Quest XI S: Echoes of an Elusive Age - Definitive Edition,Switch,27-Sep-19,91,8.93,JRPG,T
+-Disco Elysium,PC,15-Oct-19,91,8.42,RPG,M
+-The Witcher 3: Wild Hunt - Complete Edition,Switch,15-Oct-19,85,8.5,ARPG,M
+-Tangle Tower,Switch,22-Oct-19,85,8.31,Adventure,T
+-Luigi`s Mansion 3,Switch,31-Oct-19,86,8.46,Adventure,E
+-Red Dead Redemption 2,PC,05-Nov-19,93,6.25,Open-World,M
+-Kentucky Route Zero: TV Edition,Switch,28-Jan-20,87,7.31,Adventure,T
+-Two Point Hospital,Switch,25-Feb-20,85,8.11,Tycoon,E10+
+-Animal Crossing: New Horizons,Switch,20-Mar-20,90,5.54,Virtual Life,E
+-Half-Life: Alyx,PC,23-Mar-20,93,9.2,FPS,M
+-Streets of Rage 4,Switch,30-Apr-20,87,8.59,Survival,T
+-Huntdown,Switch,12-May-20,86,8.53,Platformer,T
+-Super Mega Baseball 3,Switch,13-May-20,87,7.84,Sports,E
+-Bug Fables: The Everlasting Sapling,Switch,28-May-20,85,8.47,ARPG,E
+-Xenoblade Chronicles: Definitive Edition,Switch,29-May-20,89,8.96,ARPG,T
+-Heroes of Hammerwatch - Ultimate Edition,Switch,29-Jul-20,85,7.36,ARPG,T
+-Factorio,PC,14-Aug-20,91,9.13,Tycoon,E10+
+-Microsoft Flight Simulator,PC,18-Aug-20,91,7.22,Simulation,E
+-A Short Hike,Switch,18-Aug-20,88,8.68,Adventure,E
+-Crusader Kings III,PC,01-Sep-20,91,8.42,RTS,M
+-Ori and the Will of the Wisps,Switch,17-Sep-20,93,8.71,Metroidvania,E
+-Hades,PC,17-Sep-20,93,8.88,Roguelike,T
+-Hades,Switch,17-Sep-20,93,9.03,Roguelike,T
+-Spelunky 2,PC,29-Sep-20,91,6.75,Platformer,T
+-Pikmin 3 Deluxe,Switch,30-Oct-20,85,8.39,RTS,E10+
+-Demon`s Souls,PlayStation,11-Nov-20,92,8.05,ARPG,M
+-Grindstone,Switch,15-Dec-20,87,7.91,Puzzle,T
+-Super Mario 3D World + Bowser`s Fury,Switch,12-Feb-21,89,8.69,Platformer,E
+-Overcooked! All You Can Eat,Switch,23-Mar-21,88,7.48,Compilation,E
+-Tony Hawk`s Pro Skater 1 + 2,PlayStation,26-Mar-21,90,8.59,Sports,T
+-Monster Hunter Rise,Switch,26-Mar-21,88,9,ARPG,T
+-Disco Elysium: The Final Cut,PC,30-Mar-21,97,8.25,RPG,M
+-The House in Fata Morgana - Dreams of the Revenants Edition -,Switch,09-Apr-21,97,8.18,Visual Novels,M
+-Fez,Switch,14-Apr-21,88,6.91,Platformer,E
+-There is no game : Wrong dimension,Switch,14-Apr-21,87,7.99,Point-and-Click,E10+
+-Sumire,Switch,27-May-21,86,8.23,Adventure,E
+-Overboard!,Switch,02-Jun-21,86,8,Adventure,T
++Assault Android Cactus+,Switch,08-Mar-19,85.5,8.42,Top-Down Shoot-`Em-Up,E
++Blaster Master Zero II,Switch,20-Mar-19,84.8,8.53,Top-Down Shoot-`Em-Up,E
++Cuphead,Switch,17-Apr-19,86.5,8.39,Platformer,E
++Final Fantasy XII: The Zodiac Age,Switch,30-Apr-19,84.8,8.55,JRPG,T
++Beat Saber,PC,21-May-19,93.3,8.45,Rhythm,E
++Slay the Spire,Switch,06-Jun-19,85.5,8.35,Card Battle,E
++Cadence of Hyrule: Crypt of the NecroDancer Featuring The Legend of Zelda,Switch,13-Jun-19,85.5,8.06,Rhythm,E
++Super Mario Maker 2,Switch,28-Jun-19,87.7,8.53,Platformer,E
++Final Fantasy XIV: Shadowbringers,PC,02-Jul-19,89.5,9.12,RPG,T
++What Remains of Edith Finch,Switch,04-Jul-19,88,7.76,Adventure,T
++Dragon Quest Builders 2,Switch,12-Jul-19,85.1,8.28,Sandbox,E
++Tetris Effect,PC,23-Jul-19,89.8,6.59,Puzzle,E
++Fire Emblem: Three Houses,Switch,26-Jul-19,89.4,8.79,Strategy,T
++Astral Chain,Switch,30-Aug-19,87.2,9.02,Adventure,T
++Divinity: Original Sin II - Definitive Edition,Switch,04-Sep-19,93.2,8.47,RPG,M
++Star Wars Pinball,Switch,13-Sep-19,86.4,7.37,Pinball,E10+
++AI: The Somnium Files,Switch,17-Sep-19,86.4,8.79,Adventure,M
++The Legend of Zelda: Link`s Awakening,Switch,20-Sep-19,87.4,8.42,Open-World,E
++Ori and the Blind Forest: Definitive Edition,Switch,27-Sep-19,90.2,8.6,Metroidvania,E
++Dragon Quest XI S: Echoes of an Elusive Age - Definitive Edition,Switch,27-Sep-19,90.6,8.85,JRPG,T
++Disco Elysium,PC,15-Oct-19,90.6,8.41,RPG,M
++The Witcher 3: Wild Hunt - Complete Edition,Switch,15-Oct-19,84.5,8.52,ARPG,M
++Tangle Tower,Switch,22-Oct-19,84.9,8.31,Adventure,T
++Luigi`s Mansion 3,Switch,31-Oct-19,85.8,8.53,Adventure,E
++Red Dead Redemption 2,PC,05-Nov-19,92.8,6.19,Open-World,M
++Kentucky Route Zero: TV Edition,Switch,28-Jan-20,87.2,7.27,Adventure,T
++Two Point Hospital,Switch,25-Feb-20,85.5,8.11,Tycoon,E10+
++Animal Crossing: New Horizons,Switch,20-Mar-20,90.2,5.55,Virtual Life,E
++Half-Life: Alyx,PC,23-Mar-20,93.5,9.15,FPS,M
++Streets of Rage 4,Switch,30-Apr-20,87.2,8.58,Survival,T
++Huntdown,Switch,12-May-20,86.3,8.51,Platformer,T
++Super Mega Baseball 3,Switch,13-May-20,87,7.76,Sports,E
++Bug Fables: The Everlasting Sapling,Switch,28-May-20,85.2,8.47,ARPG,E
++Xenoblade Chronicles: Definitive Edition,Switch,29-May-20,89.3,9.01,ARPG,T
++Heroes of Hammerwatch - Ultimate Edition,Switch,29-Jul-20,84.9,7.35,ARPG,T
++Factorio,PC,14-Aug-20,90.6,9.11,Tycoon,E10+
++Microsoft Flight Simulator,PC,18-Aug-20,90.9,7.16,Simulation,E
++A Short Hike,Switch,18-Aug-20,88.4,8.66,Adventure,E
++Crusader Kings III,PC,01-Sep-20,90.8,8.38,RTS,M
++Ori and the Will of the Wisps,Switch,17-Sep-20,92.7,8.7,Metroidvania,E
++Hades,PC,17-Sep-20,92.8,8.89,Roguelike,T
++Hades,Switch,17-Sep-20,93.3,8.96,Roguelike,T
++Spelunky 2,PC,29-Sep-20,90.8,6.7,Platformer,T
++Pikmin 3 Deluxe,Switch,30-Oct-20,85.1,8.36,RTS,E10+
++Demon`s Souls,PlayStation,11-Nov-20,92,8.14,ARPG,M
++Grindstone,Switch,15-Dec-20,86.6,7.86,Puzzle,T
++Super Mario 3D World + Bowser`s Fury,Switch,12-Feb-21,89.5,8.71,Platformer,E
++Overcooked! All You Can Eat,Switch,23-Mar-21,88.1,7.46,Compilation,E
++Tony Hawk`s Pro Skater 1 + 2,PlayStation,26-Mar-21,90.2,8.61,Sports,T
++Monster Hunter Rise,Switch,26-Mar-21,88.2,8.95,ARPG,T
++Disco Elysium: The Final Cut,PC,30-Mar-21,97.1,8.27,RPG,M
++The House in Fata Morgana - Dreams of the Revenants Edition -,Switch,09-Apr-21,97.1,8.23,Visual Novels,M
++Fez,Switch,14-Apr-21,88,6.92,Platformer,E
++There is no game : Wrong dimension,Switch,14-Apr-21,86.9,8.03,Point-and-Click,E10+
++Sumire,Switch,27-May-21,86,8.21,Adventure,E
++Overboard!,Switch,02-Jun-21,85.8,8.04,Adventure,T
+ Final Fantasy VII Remake Intergrade,PlayStation,10-Jun-21,89,8.34,ARPG,T
+-Tony Hawk`s Pro Skater 1 + 2,Switch,25-Jun-21,85,6.98,Sports,T
+-Doki Doki Literature Club Plus!,Switch,30-Jun-21,85,8.31,Visual Novels,M
+-The Great Ace Attorney Chronicles,Switch,27-Jul-21,87,7.3,Compilation,T
+-Bustafellows,Switch,30-Jul-21,86,7.8,Visual Novels,M
+-Hades,PlayStation,13-Aug-21,93,8.66,Roguelike,T
+-Quake Remastered,Switch,19-Aug-21,87,8.18,FPS,M
+-Tetris Effect: Connected,Switch,08-Oct-21,95,8.46,Puzzle,E
+-Metroid Dread,Switch,08-Oct-21,89,8.82,Metroidvania,T
+-Disco Elysium: The Final Cut,Switch,12-Oct-21,87,8.68,RPG,M
+-Final Fantasy XIV: Endwalker,PlayStation,07-Dec-21,90,8.23,JRPG,T
+-God of War,PC,14-Jan-22,93,9.06,Adventure,M
+-Elden Ring,PC,25-Feb-22,94,8.04,ARPG,M
+-Elden Ring,PlayStation,25-Feb-22,96,7.97,ARPG,M
+-13 Sentinels: Aegis Rim,Switch,12-Apr-22,88,8.84,Adventure,T
+-The Stanley Parable: Ultra Deluxe,PC,27-Apr-22,90,8.29,Adventure,T
+-Neon White,Switch,16-Jun-22,88,8.07,FPS,T
+-Neon White,PC,16-Jun-22,89,8.43,FPS,T
+-Portal: Companion Collection,Switch,28-Jun-22,95,9.31,FPS,E10+
+-Cuphead in the Delicious Last Course,Switch,30-Jun-22,88,8.81,Platformer,E10+
+-I Was a Teenage Exocolonist,PC,25-Aug-22,91,7.9,Card Battle,T
+-The Legend of Heroes: Trails from Zero,PC,27-Sep-22,90,7.61,JRPG,T
+-Tunic,Switch,27-Sep-22,88,7.85,Open-World,E10+
+-NieR: Automata - The End of YoRHa Edition,Switch,06-Oct-22,89,7.46,ARPG,M
+-Persona 5 Royal,Switch,21-Oct-22,94,8.23,JRPG,M
+-Persona 5 Royal,PlayStation,21-Oct-22,91,8.56,JRPG,M
+-Persona 5 Royal,PC,21-Oct-22,95,8.61,JRPG,M
+-God of War: Ragnarok,PlayStation,09-Nov-22,94,8.05,Adventure,M
+-Atari 50: The Anniversary Celebration,Switch,11-Nov-22,89,7.86,Compilation,T
+-Chained Echoes,Switch,08-Dec-22,90,8.6,JRPG,M
+-Chained Echoes,PC,08-Dec-22,91,8.63,JRPG,M
+-The Witcher 3: Wild Hunt - Complete Edition,PlayStation,14-Dec-22,94,8.84,ARPG,M
+-Persona 4 Golden,Switch,19-Jan-23,90,8.67,JRPG,M
+-Hi-Fi Rush,PC,25-Jan-23,90,8.89,Platformer,T
+-Pizza Tower,PC,26-Jan-23,89,8.85,Platformer,T
+-Dead Space,PlayStation,27-Jan-23,89,8.65,Survival,M
+-Metroid Prime Remastered,Switch,08-Feb-23,94,8.82,FPS,T
+-Moss: Book II,PlayStation,22-Feb-23,90,7.32,Adventure,E10+
+-Tetris Effect: Connected,PlayStation,22-Feb-23,93,8.28,Puzzle,E
+-Resident Evil 4,PC,24-Mar-23,91,8.14,Survival,M
+-Resident Evil 4,PlayStation,24-Mar-23,93,8.09,Survival,M
+-Xenoblade Chronicles 3: Expansion Pass Wave 4 - Future Redeemed,Switch,25-Apr-23,92,9.07,ARPG,T
+-The Legend of Zelda: Tears of the Kingdom,Switch,12-May-23,96,8.43,Open-World,E10+
+-Street Fighter 6,PC,02-Jun-23,92,6.91,Fighting,T
+-Street Fighter 6,PlayStation,02-Jun-23,92,6.96,Fighting,T
+-Jack Jeanne,Switch,15-Jun-23,90,7.68,Visual Novel,T
+-Rogue Legacy 2,PlayStation,20-Jun-23,90,7.35,Roguelike,E10+
+-DAVE THE DIVER,PC,28-Jun-23,90,8.27,Adventure,E10+
+-DAVE THE DIVER,PlayStation,28-Jun-23,91,8.94,Adventure,E10+
+-Ghost Trick: Phantom Detective,PC,30-Jun-23,90,9.53,Adventure,T
+-Xenoblade Chronicles 3,Switch,29-Jul-23,89,8.55,ARPG,T
+-VIDEOVERSE,PC,07-Aug-23,90,6.82,Adventure,M
+-Vampire Survivors,Switch,17-Aug-23,88,8.33,Top-Down Shoot-`Em-Up,T
+-The Making of Karateka,Switch,29-Aug-23,90,7.44,Action,E10+
+-Sea of Stars,Switch,29-Aug-23,90,7.66,JRPG,E10+
+-Resident Evil 4: Separate Ways,PC,21-Sep-23,89,9.11,Survival,M
+-Cyberpunk 2077: Phantom Liberty,PC,26-Sep-23,89,7.36,ARPG,M
+-Cocoon,PlayStation,29-Sep-23,90,7.86,Adventure,T
+-Baldur`s Gate 3,PC,03-Oct-23,96,8.94,RPG,M
+-Baldur`s Gate 3,PlayStation,03-Oct-23,96,8.87,RPG,M
+-Marvel`s Spider-Man 2,PlayStation,20-Oct-23,90,8.85,Open-World,T
+-Super Mario Bros. Wonder,Switch,20-Oct-23,92,9.09,Platformer,E
+-Slay the Princess,PC,23-Oct-23,90,8.41,Visual Novel,M
+-DAVE THE DIVER,Switch,26-Oct-23,88,8.57,Adventure,E10+
+-Alan Wake II,PC,27-Oct-23,89,8.74,Survival,M
+-The Talos Principle 2,PlayStation,02-Nov-23,90,9.16,Adventure,E10+
+-Against the Storm,PC,08-Dec-23,91,8.2,Management,E10+
+-Prince of Persia: The Lost Crown,Switch,18-Jan-24,88,8.64,Metroidvania,T
+-The Last of Us Part II Remastered,PlayStation,19-Jan-24,90,8.2,Survival,M
+-Tekken 8,PC,26-Jan-24,91,6.04,Fighting,T
++Tony Hawk`s Pro Skater 1 + 2,Switch,25-Jun-21,85.3,7.03,Sports,T
++Doki Doki Literature Club Plus!,Switch,30-Jun-21,85.2,8.33,Visual Novels,M
++The Great Ace Attorney Chronicles,Switch,27-Jul-21,87.1,7.31,Compilation,T
++Bustafellows,Switch,30-Jul-21,85.8,7.76,Visual Novels,M
++Hades,PlayStation,13-Aug-21,92.8,8.68,Roguelike,T
++Quake Remastered,Switch,19-Aug-21,87.3,8.16,FPS,M
++Tetris Effect: Connected,Switch,08-Oct-21,94.7,8.49,Puzzle,E
++Metroid Dread,Switch,08-Oct-21,88.9,8.76,Metroidvania,T
++Disco Elysium: The Final Cut,Switch,12-Oct-21,87.1,8.74,RPG,M
++Final Fantasy XIV: Endwalker,PlayStation,07-Dec-21,89.8,8.19,JRPG,T
++God of War,PC,14-Jan-22,92.9,9.13,Adventure,M
++Elden Ring,PC,25-Feb-22,93.5,8.03,ARPG,M
++Elden Ring,PlayStation,25-Feb-22,96.1,8.01,ARPG,M
++13 Sentinels: Aegis Rim,Switch,12-Apr-22,87.7,8.79,Adventure,T
++The Stanley Parable: Ultra Deluxe,PC,27-Apr-22,90.1,8.29,Adventure,T
++Neon White,Switch,16-Jun-22,87.7,8.06,FPS,T
++Neon White,PC,16-Jun-22,89.2,8.42,FPS,T
++Portal: Companion Collection,Switch,28-Jun-22,94.7,9.26,FPS,E10+
++Cuphead in the Delicious Last Course,Switch,30-Jun-22,87.8,8.84,Platformer,E10+
++I Was a Teenage Exocolonist,PC,25-Aug-22,90.9,7.91,Card Battle,T
++The Legend of Heroes: Trails from Zero,PC,27-Sep-22,89.8,7.62,JRPG,T
++Tunic,Switch,27-Sep-22,87.9,7.8,Open-World,E10+
++NieR: Automata - The End of YoRHa Edition,Switch,06-Oct-22,88.5,7.55,ARPG,M
++Persona 5 Royal,Switch,21-Oct-22,94.2,8.23,JRPG,M
++Persona 5 Royal,PlayStation,21-Oct-22,91,8.64,JRPG,M
++Persona 5 Royal,PC,21-Oct-22,95,8.64,JRPG,M
++God of War: Ragnarok,PlayStation,09-Nov-22,93.8,8.08,Adventure,M
++Atari 50: The Anniversary Celebration,Switch,11-Nov-22,89,7.9,Compilation,T
++Chained Echoes,Switch,08-Dec-22,90.5,8.58,JRPG,M
++Chained Echoes,PC,08-Dec-22,90.9,8.63,JRPG,M
++The Witcher 3: Wild Hunt - Complete Edition,PlayStation,14-Dec-22,94.2,8.82,ARPG,M
++Persona 4 Golden,Switch,19-Jan-23,89.9,8.7,JRPG,M
++Hi-Fi Rush,PC,25-Jan-23,89.7,8.92,Platformer,T
++Pizza Tower,PC,26-Jan-23,88.7,8.75,Platformer,T
++Dead Space,PlayStation,27-Jan-23,89,8.72,Survival,M
++Metroid Prime Remastered,Switch,08-Feb-23,94,8.78,FPS,T
++Moss: Book II,PlayStation,22-Feb-23,89.9,7.27,Adventure,E10+
++Tetris Effect: Connected,PlayStation,22-Feb-23,92.6,8.27,Puzzle,E
++Resident Evil 4,PC,24-Mar-23,91.1,8.11,Survival,M
++Resident Evil 4,PlayStation,24-Mar-23,92.8,8.1,Survival,M
++Xenoblade Chronicles 3: Expansion Pass Wave 4 - Future Redeemed,Switch,25-Apr-23,92.3,9.13,ARPG,T
++The Legend of Zelda: Tears of the Kingdom,Switch,12-May-23,96,8.39,Open-World,E10+
++Street Fighter 6,PC,02-Jun-23,92.3,6.92,Fighting,T
++Street Fighter 6,PlayStation,02-Jun-23,92.4,6.96,Fighting,T
++Jack Jeanne,Switch,15-Jun-23,89.8,7.72,Visual Novel,T
++Rogue Legacy 2,PlayStation,20-Jun-23,89.9,7.43,Roguelike,E10+
++DAVE THE DIVER,PC,28-Jun-23,89.8,8.32,Adventure,E10+
++DAVE THE DIVER,PlayStation,28-Jun-23,90.7,8.86,Adventure,E10+
++Ghost Trick: Phantom Detective,PC,30-Jun-23,89.7,9.54,Adventure,T
++Xenoblade Chronicles 3,Switch,29-Jul-23,89.1,8.47,ARPG,T
++VIDEOVERSE,PC,07-Aug-23,90.4,6.8,Adventure,M
++Vampire Survivors,Switch,17-Aug-23,88.2,8.3,Top-Down Shoot-`Em-Up,T
++The Making of Karateka,Switch,29-Aug-23,90.4,7.4,Action,E10+
++Sea of Stars,Switch,29-Aug-23,90.2,7.72,JRPG,E10+
++Resident Evil 4: Separate Ways,PC,21-Sep-23,89,9.07,Survival,M
++Cyberpunk 2077: Phantom Liberty,PC,26-Sep-23,88.6,7.4,ARPG,M
++Cocoon,PlayStation,29-Sep-23,90.2,7.85,Adventure,T
++Baldur`s Gate 3,PC,03-Oct-23,96.3,8.92,RPG,M
++Baldur`s Gate 3,PlayStation,03-Oct-23,95.6,8.87,RPG,M
++Marvel`s Spider-Man 2,PlayStation,20-Oct-23,90.2,8.88,Open-World,T
++Super Mario Bros. Wonder,Switch,20-Oct-23,92.4,9.07,Platformer,E
++Slay the Princess,PC,23-Oct-23,90.1,8.4,Visual Novel,M
++DAVE THE DIVER,Switch,26-Oct-23,87.9,8.57,Adventure,E10+
++Alan Wake II,PC,27-Oct-23,88.8,8.71,Survival,M
++The Talos Principle 2,PlayStation,02-Nov-23,90.2,9.21,Adventure,E10+
++Against the Storm,PC,08-Dec-23,91.1,8.24,Management,E10+
++Prince of Persia: The Lost Crown,Switch,18-Jan-24,88.5,8.59,Metroidvania,T
++The Last of Us Part II Remastered,PlayStation,19-Jan-24,90.3,8.17,Survival,M
++Tekken 8,PC,26-Jan-24,91.2,5.99,Fighting,T
+ Tekken 8,PlayStation,26-Jan-24,90,7.49,Fighting,T
+-Like a Dragon: Infinite Wealth,PC,26-Jan-24,89,8.55,JRPG,M
+-Balatro,PC,20-Feb-24,90,8.6,Card Battle,M
+-Balatro,Switch,20-Feb-24,90,8.64,Card Battle,M
+-Balatro,PlayStation,20-Feb-24,93,8.58,Card Battle,M
+-Pentiment,Switch,22-Feb-24,90,8.82,Adventure,M
+-Final Fantasy VII Rebirth,PlayStation,29-Feb-24,92,9.03,JRPG,T
+-Unicorn Overlord,Switch,08-Mar-24,89,8.72,RTS,T
+-Black & White,PC,01-Mar-26,90,7.69,Strategy,T
++Like a Dragon: Infinite Wealth,PC,26-Jan-24,88.8,8.6,JRPG,M
++Balatro,PC,20-Feb-24,89.8,8.56,Card Battle,M
++Balatro,Switch,20-Feb-24,89.6,8.57,Card Battle,M
++Balatro,PlayStation,20-Feb-24,92.9,8.56,Card Battle,M
++Pentiment,Switch,22-Feb-24,90.3,8.82,Adventure,M
++Final Fantasy VII Rebirth,PlayStation,29-Feb-24,92.5,9.02,JRPG,T
++Unicorn Overlord,Switch,08-Mar-24,89.3,8.75,RTS,T
++Black & White,PC,01-Mar-26,90.2,7.68,Strategy,T
