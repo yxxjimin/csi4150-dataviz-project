@@ -2,17 +2,26 @@ const width = 1200;
 const height = 500;
 const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
+let selectedPlatforms = [];
+let selectedGenres = [];
+let selectedAges = [];
+
 d3.csv("../visualizer_preprocess.csv").then((dataset) => {
-    createCheckboxes(dataset);
+    selectedPlatforms = Array.from(new Set(dataset.map(d => d.platform)));
+    selectedGenres = Array.from(new Set(dataset.map(d => d.genre)));
+    selectedAges = Array.from(new Set(dataset.map(d => d.target_age)));
+    createCheckboxes(dataset, 'platform', 'checkboxes', selectedPlatforms);
+    createCheckboxes(dataset, 'genre', 'genreCheckboxes', selectedGenres);
+    createCheckboxes(dataset, 'target_age', 'ageCheckboxes', selectedAges);
     showScatterPlot(dataset);
 });
 
-function createCheckboxes(data) {
-    const platforms = Array.from(new Set(data.map(d => d.platform)));
-    const checkboxContainer = d3.select("#checkboxes");
+function createCheckboxes(data, key, containerId, selectedItems) {
+    const items = Array.from(new Set(data.map(d => d[key])));
+    const checkboxContainer = d3.select(`#${containerId}`);
 
     checkboxContainer.selectAll("label")
-        .data(platforms)
+        .data(items)
         .enter()
         .append("label")
         .text(d => d)
@@ -21,13 +30,13 @@ function createCheckboxes(data) {
         .attr("value", d => d)
         .attr("checked", true)
         .on("change", function() {
-            const selectedPlatforms = [];
+            selectedItems.length = 0;
             checkboxContainer.selectAll("input").each(function(d) {
                 if (d3.select(this).property("checked")) {
-                    selectedPlatforms.push(d);
+                    selectedItems.push(d);
                 }
             });
-            updateScatterPlot(data, selectedPlatforms);
+            updateScatterPlot(data);
         });
 }
 
@@ -227,9 +236,8 @@ function showScatterPlot(data) {
     attachTooltip();
 }
 
-
-function updateScatterPlot(data, selectedPlatforms) {
-    const filteredData = data.filter(d => selectedPlatforms.includes(d.platform));
+function updateScatterPlot(data) {
+    const filteredData = data.filter(d => selectedPlatforms.includes(d.platform) && selectedGenres.includes(d.genre) && selectedAges.includes(d.target_age));
 
     const svg = d3.select("#chart svg g");
 
@@ -261,4 +269,3 @@ function updateScatterPlot(data, selectedPlatforms) {
         .attr("r", 4)
         .attr("fill", (d) => colorScale(d.genre));
 }
-
