@@ -3,8 +3,33 @@ const height = 500;
 const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
 d3.csv("../visualizer_preprocess.csv").then((dataset) => {
+    createCheckboxes(dataset);
     showScatterPlot(dataset);
 });
+
+function createCheckboxes(data) {
+    const platforms = Array.from(new Set(data.map(d => d.platform)));
+    const checkboxContainer = d3.select("#checkboxes");
+
+    checkboxContainer.selectAll("label")
+        .data(platforms)
+        .enter()
+        .append("label")
+        .text(d => d)
+        .append("input")
+        .attr("type", "checkbox")
+        .attr("value", d => d)
+        .attr("checked", true)
+        .on("change", function() {
+            const selectedPlatforms = [];
+            checkboxContainer.selectAll("input").each(function(d) {
+                if (d3.select(this).property("checked")) {
+                    selectedPlatforms.push(d);
+                }
+            });
+            updateScatterPlot(data, selectedPlatforms);
+        });
+}
 
 function showScatterPlot(data) {
     const svg = d3
@@ -43,7 +68,6 @@ function showScatterPlot(data) {
         .style("border", "1px solid #ccc")
         .style("padding", "5px")
         .style("pointer-events", "none");
-
 
     const circles = svg.selectAll("circle")
         .data(data)
@@ -92,20 +116,18 @@ function showScatterPlot(data) {
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "4");
 
-    let activeGenre = null;
     const legend = svg.selectAll(".legend")
         .data(colorScale.domain())
         .enter().append("g")
         .attr("class", "legend")
         .attr("transform", (d, i) => `translate(0, ${i * 20})`)
         .on("click", function(event, genre) {
+            const circles = svg.selectAll("circle");
             if (activeGenre === genre) {
-                svg.selectAll("circle")
-                    .style("opacity", 1);
+                circles.style("opacity", 1);
                 activeGenre = null;
             } else {
-                svg.selectAll("circle")
-                    .style("opacity", d => d.genre === genre ? 1 : 0.1);
+                circles.style("opacity", d => d.genre === genre ? 1 : 0.1);
                 activeGenre = genre;
             }
         });
@@ -181,7 +203,6 @@ function showScatterPlot(data) {
     }
 
     function attachTooltip() {
-        console.log("hi");
         svg.selectAll("circle")
             .on("mouseover", (event, d) => {
                 tooltip.transition()
@@ -193,7 +214,7 @@ function showScatterPlot(data) {
             })
             .on("mousemove", (event) => {
                 tooltip.style("left", (event.clientX + 10) + "px")
-                       .style("top", (event.clientY - 25) + "px");
+                .style("top", (event.clientY - 25) + "px");
             })
             .on("mouseout", () => {
                 tooltip.transition()
@@ -203,4 +224,63 @@ function showScatterPlot(data) {
     }
 
     attachTooltip();
+}
+
+function updateScatterPlot(data, selectedPlatforms) {
+    const filteredData = data.filter(d => selectedPlatforms.includes(d.platform));
+
+    const svg = d3.select("#chart svg g");
+
+    const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+        .domain(data.map(d => d.genre));
+
+    const xScale = d3.scaleLinear()
+        .domain([3, d3.max(data, (d) => +d.user_review)])
+        .range([0, width]);
+
+    const yScale = d3.scaleLinear()
+        .domain([84, d3.max(data, (d) => +d.meta_score)])
+        .range([height, 0]);
+
+    const circles = svg.selectAll("circle")
+        .data(filteredData, d => d.name);
+
+    circles.exit().remove();
+
+    circles.enter()
+        .append("circle")
+        .attr("cx", (d) => xScale(+d.user_review))
+        .attr("cy", (d) => yScale(+d.meta_score))
+        .attr("r", 4)
+        .attr("fill", (d) => colorScale(d.genre))
+        .merge(circles)
+        .attr("cx", (d) => xScale(+d.user_review))
+        .attr("cy", (d) => yScale(+d.meta_score))
+        .attr("r", 4)
+        .attr("fill", (d) => colorScale(d.genre));
+
+    attachTooltip();
+}
+
+function attachTooltip() {
+    const tooltip = d3.select(".tooltip");
+
+    d3.selectAll("circle")
+        .on("mouseover", (event, d) => {
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html(`Name: ${d.name}<br/>Platform: ${d.platform}<br/>Release Date: ${d.release_date}<br/>Genre: ${d.genre}<br/>Meta Score: ${d.meta_score}<br/>User Review: ${d.user_review}`)
+                .style("left", (event.clientX + 10) + "px")
+                .style("top", (event.clientY - 25) + "px");
+        })
+        .on("mousemove", (event) => {
+            tooltip.style("left", (event.clientX + 10) + "px")
+                   .style("top", (event.clientY - 25) + "px");
+        })
+        .on("mouseout", () => {
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 }
