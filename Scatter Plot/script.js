@@ -36,7 +36,14 @@ function showScatterPlot(data) {
 
     const tooltip = d3.select("body").append("div")
         .attr("class", "tooltip")
-        .style("opacity", 0);
+        .style("opacity", 0)
+        .style("position", "absolute")
+        .style("z-index", "10")
+        .style("background", "white")
+        .style("border", "1px solid #ccc")
+        .style("padding", "5px")
+        .style("pointer-events", "none");
+
 
     const circles = svg.selectAll("circle")
         .data(data)
@@ -54,7 +61,7 @@ function showScatterPlot(data) {
                 .style("left", (event.clientX + 10) + "px")
                 .style("top", (event.clientY - 25) + "px");
         })
-        .on("mousemove", (event, d) => {
+        .on("mousemove", (event) => {
             tooltip.style("left", (event.clientX + 10) + "px")
                    .style("top", (event.clientY - 25) + "px");
         })
@@ -154,7 +161,8 @@ function showScatterPlot(data) {
         svg.selectAll("circle").transition(t)
             .attr("cx", (d) => xScale(+d.user_review))
             .attr("cy", (d) => yScale(+d.meta_score))
-            .attr("r", d => selectedData.includes(d) ? 4 : 0);
+            .attr("r", d => selectedData.includes(d) ? 4 : 0)
+            .on("end", attachTooltip);
     }
 
     function resetZoom() {
@@ -168,6 +176,31 @@ function showScatterPlot(data) {
         svg.selectAll("circle").transition(t)
             .attr("cx", (d) => xScale(+d.user_review))
             .attr("cy", (d) => yScale(+d.meta_score))
-            .attr("r", 4);
+            .attr("r", 4)
+            .on("end", attachTooltip);
     }
+
+    function attachTooltip() {
+        console.log("hi");
+        svg.selectAll("circle")
+            .on("mouseover", (event, d) => {
+                tooltip.transition()
+                    .duration(200)
+                    .style("opacity", .9);
+                tooltip.html(`Name: ${d.name}<br/>Platform: ${d.platform}<br/>Release Date: ${d.release_date}<br/>Genre: ${d.genre}<br/>Meta Score: ${d.meta_score}<br/>User Review: ${d.user_review}`)
+                    .style("left", (event.clientX + 10) + "px")
+                    .style("top", (event.clientY - 25) + "px");
+            })
+            .on("mousemove", (event) => {
+                tooltip.style("left", (event.clientX + 10) + "px")
+                       .style("top", (event.clientY - 25) + "px");
+            })
+            .on("mouseout", () => {
+                tooltip.transition()
+                    .duration(500)
+                    .style("opacity", 0);
+            });
+    }
+
+    attachTooltip();
 }
