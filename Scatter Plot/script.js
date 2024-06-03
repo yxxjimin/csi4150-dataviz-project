@@ -1,4 +1,4 @@
-const width = 600;
+const width = 1200;
 const height = 500;
 const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
@@ -16,7 +16,7 @@ function showScatterPlot(data) {
         .attr("transform", `translate(${margin.left}, ${margin.top})`);
 
     const xScale = d3.scaleLinear()
-        .domain([3, d3.max(data, (d) => +d.user_review)])
+        .domain([6, d3.max(data, (d) => +d.user_review)])
         .range([0, width]);
 
     const yScale = d3.scaleLinear()
