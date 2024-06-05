@@ -8,7 +8,7 @@ let selectedAges = [];
 let zoomLevelX = 1;
 let zoomLevelY = 1;
 
-d3.csv("../visualizer.csv").then((dataset) => {
+d3.csv("../visualizer_genre.csv").then((dataset) => {
     selectedPlatforms = Array.from(new Set(dataset.map(d => d.platform)));
     selectedGenres = Array.from(new Set(dataset.map(d => d.genre)));
     selectedAges = Array.from(new Set(dataset.map(d => d.target_age)));
