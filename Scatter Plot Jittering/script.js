@@ -62,6 +62,11 @@ function showScatterPlot(data) {
     const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
         .domain(data.map(d => d.genre));
 
+    const shapeScale = d3.scaleOrdinal(d3.symbols)
+        .domain(data.map(d => d.platform));
+
+    const symbol = d3.symbol();
+
     const xAxis = d3.axisBottom().scale(xScale);
     const xAxisGroup = svg.append("g")
         .attr("transform", `translate(0, ${height})`)
@@ -113,14 +118,14 @@ function showScatterPlot(data) {
 
     const updatedData = adjustPadding(zoomLevelX, zoomLevelY);
 
-    const circles = svg.selectAll("circle")
+    const shapes = svg.selectAll(".point")
         .data(updatedData)
         .enter()
-        .append("circle")
-        .attr("cx", (d) => xScale(+d.adjusted_user_review))
-        .attr("cy", (d) => yScale(+d.adjusted_meta_score))
-        .attr("r", 5)
-        .attr("fill", (d) => colorScale(d.genre))
+        .append("path")
+        .attr("class", "point")
+        .attr("d", d => symbol.type(shapeScale(d.platform))())
+        .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
+        .attr("fill", d => colorScale(d.genre))
         .on("mouseover", (event, d) => {
             tooltip.transition()
                 .duration(200)
@@ -167,12 +172,12 @@ function showScatterPlot(data) {
         .attr("class", "legend")
         .attr("transform", (d, i) => `translate(0, ${i * 20})`)
         .on("click", function(event, genre) {
-            const circles = svg.selectAll("circle");
+            const shapes = svg.selectAll(".point");
             if (activeGenre === genre) {
-                circles.style("opacity", 1);
+                shapes.style("opacity", 1);
                 activeGenre = null;
             } else {
-                circles.style("opacity", d => d.genre === genre ? 1 : 0.1);
+                shapes.style("opacity", d => d.genre === genre ? 1 : 0.1);
                 activeGenre = genre;
             }
         });
@@ -230,10 +235,9 @@ function showScatterPlot(data) {
 
         const updatedData = adjustPadding(zoomLevelX, zoomLevelY);
 
-        svg.selectAll("circle").transition(t)
-            .attr("cx", (d) => xScale(+d.adjusted_user_review))
-            .attr("cy", (d) => yScale(+d.adjusted_meta_score))
-            .attr("r", d => selectedData.includes(d) ? 5 : 0)
+        svg.selectAll(".point").transition(t)
+            .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
+            .attr("d", d => selectedData.includes(d) ? symbol.type(shapeScale(d.platform))() : "")
             .on("end", attachTooltip);
     }
 
@@ -250,15 +254,14 @@ function showScatterPlot(data) {
 
         const updatedData = adjustPadding(zoomLevelX, zoomLevelY);
 
-        svg.selectAll("circle").transition(t)
-            .attr("cx", (d) => xScale(+d.adjusted_user_review))
-            .attr("cy", (d) => yScale(+d.adjusted_meta_score))
-            .attr("r", 5)
+        svg.selectAll(".point").transition(t)
+            .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
+            .attr("d", d => symbol.type(shapeScale(d.platform))())
             .on("end", attachTooltip);
     }
 
     function attachTooltip() {
-        svg.selectAll("circle")
+        svg.selectAll(".point")
             .on("mouseover", (event, d) => {
                 tooltip.transition()
                     .duration(200)
@@ -289,6 +292,11 @@ function updateScatterPlot(data) {
     const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
         .domain(data.map(d => d.genre));
 
+    const shapeScale = d3.scaleOrdinal(d3.symbols)
+        .domain(data.map(d => d.platform));
+
+    const symbol = d3.symbol();
+
     const xScale = d3.scaleLinear()
         .domain([6, d3.max(data, (d) => +d.user_review)])
         .range([0, width]);
@@ -297,22 +305,19 @@ function updateScatterPlot(data) {
         .domain([84, d3.max(data, (d) => +d.meta_score)])
         .range([height, 0]);
 
-    const circles = svg.selectAll("circle")
+    const shapes = svg.selectAll(".point")
         .data(filteredData, d => d.name);
 
-    circles.exit().remove();
+    shapes.exit().remove();
 
-    //const updatedData = adjustPadding(zoomLevelX, zoomLevelY);
-
-    circles.enter()
-        .append("circle")
-        .attr("cx", (d) => xScale(+d.adjusted_user_review))
-        .attr("cy", (d) => yScale(+d.adjusted_meta_score))
-        .attr("r", 5)
-        .attr("fill", (d) => colorScale(d.genre))
-        .merge(circles)
-        .attr("cx", (d) => xScale(+d.adjusted_user_review))
-        .attr("cy", (d) => yScale(+d.adjusted_meta_score))
-        .attr("r", 5)
-        .attr("fill", (d) => colorScale(d.genre));
+    shapes.enter()
+        .append("path")
+        .attr("class", "point")
+        .attr("d", d => symbol.type(shapeScale(d.platform))())
+        .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
+        .attr("fill", d => colorScale(d.genre))
+        .merge(shapes)
+        .attr("d", d => symbol.type(shapeScale(d.platform))())
+        .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
+        .attr("fill", d => colorScale(d.genre));
 }
