@@ -1,4 +1,4 @@
-const width = 300;
+const width = 600;
 const height = 300;
 const margin = 40;
 const radius = Math.min(width, height) / 2 - margin;
@@ -45,30 +45,41 @@ function drawPieChart(svg, data) {
         .style("stroke-width", "2px")
         .style("opacity", 0.7);
 
-    svg.selectAll('text')
-        .data(data_ready)
+    // Add legend
+    const legend = svg.append("g")
+        .attr("transform", `translate(${radius + 10}, -${radius})`);
+
+    const legendItem = legend.selectAll(".legend-item")
+        .data(data)
         .enter()
-        .append('text')
-        .text(d => d.data.key)
-        .attr("transform", d => `translate(${arc.centroid(d)})`)
-        .style("text-anchor", "middle")
+        .append("g")
+        .attr("class", "legend-item")
+        .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+
+    legendItem.append("rect")
+        .attr("width", 18)
+        .attr("height", 18)
+        .attr("fill", d => color(d.key));
+
+    legendItem.append("text")
+        .attr("x", 24)
+        .attr("y", 9)
+        .attr("dy", "0.35em")
+        .text(d => d.key)
         .style("font-size", 12);
 }
 
-d3.csv("../visualizer_preprocess.csv").then((dataset) => {
+d3.csv("../visualizer_genre.csv").then((dataset) => {
     dataset.forEach(d => {
         d.release_year = new Date(d.release_date).getFullYear();
     });
 
     const genreData = aggregateData(dataset, 'genre');
-    const platformData = aggregateData(dataset, 'platform');
     const targetAgeData = aggregateData(dataset, 'target_age');
 
     const svgGenre = createSvg("#chart-genre");
-    const svgPlatform = createSvg("#chart-platform");
     const svgTargetAge = createSvg("#chart-target-age");
 
     drawPieChart(svgGenre, genreData);
-    drawPieChart(svgPlatform, platformData);
     drawPieChart(svgTargetAge, targetAgeData);
 });
