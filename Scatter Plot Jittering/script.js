@@ -1,5 +1,6 @@
 const width = 1200;
 const height = 500;
+const barChartHeight = 300; // Height for the bar chart
 const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
 let selectedPlatforms = [];
@@ -150,6 +151,7 @@ function showScatterPlot(data) {
                 d3.select(this).attr("fill", "black");
             }
             updateSelectedGamesBox();
+            drawBarChart(data.filter(d => selectedPoints.has(`${d.name}-${d.platform}`)));
         })
         .on("mouseover", (event, d) => {
             tooltip.transition()
@@ -173,6 +175,15 @@ function showScatterPlot(data) {
     const avgMetaScore = d3.mean(data, d => +d.meta_score);
 
     svg.append("line")
+        .attr("x1", xScale(avgUserReview))
+        .attr("x2", xScale(avgUserReview))
+        .attr("y1", 0)
+        .attr("y2", height)
+        .attr("stroke", "grey")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "4");
+
+        svg.append("line")
         .attr("x1", xScale(avgUserReview))
         .attr("x2", xScale(avgUserReview))
         .attr("y1", 0)
@@ -338,6 +349,53 @@ function showScatterPlot(data) {
         const selectedGamesDiv = d3.select("#selectedGames");
         selectedGamesDiv.html(Array.from(selectedPoints).map(p => p.split('-')[0]).join(", "));
     }
+
+    function drawBarChart(selectedData) {
+        const barChartWidth = width;
+        const barChartMargin = { top: 20, right: 30, bottom: 70, left: 40 };
+        const barChartInnerWidth = barChartWidth - barChartMargin.left - barChartMargin.right;
+        const barChartInnerHeight = barChartHeight - barChartMargin.top - barChartMargin.bottom;
+
+        const barChartSvg = d3.select("#barChart")
+            .html("") // Clear previous bar chart
+            .append("svg")
+            .attr("width", barChartWidth + barChartMargin.left + barChartMargin.right)
+            .attr("height", barChartHeight + barChartMargin.top + barChartMargin.bottom)
+            .append("g")
+            .attr("transform", `translate(${barChartMargin.left}, ${barChartMargin.top})`);
+
+        const xBarScale = d3.scaleBand()
+            .domain(selectedData.map(d => d.name))
+            .range([0, barChartInnerWidth])
+            .padding(0.2);  // Adjust padding to make bars skinnier
+        
+        const minMetaScore = d3.min(selectedData, d => +d.meta_score) - 1;
+        const yBarScale = d3.scaleLinear()
+            .domain([minMetaScore, d3.max(selectedData, d => +d.meta_score)])
+            .nice()
+            .range([barChartInnerHeight, 0]);
+
+        barChartSvg.append("g")
+            .attr("transform", `translate(0, ${barChartInnerHeight})`)
+            .call(d3.axisBottom(xBarScale))
+            .selectAll("text")
+            .attr("transform", "rotate(-45)")
+            .style("text-anchor", "end");
+
+        barChartSvg.append("g")
+            .call(d3.axisLeft(yBarScale));
+
+        barChartSvg.selectAll(".bar")
+            .data(selectedData)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", d => xBarScale(d.name))
+            .attr("y", d => yBarScale(+d.meta_score))
+            .attr("width", xBarScale.bandwidth())
+            .attr("height", d => barChartInnerHeight - yBarScale(+d.meta_score))
+            .attr("fill", "steelblue");
+    }
 }
 
 function updateScatterPlot(data) {
@@ -380,5 +438,84 @@ function updateScatterPlot(data) {
         .attr("d", d => symbol.type(shapeScale(d.platform))())
         .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
         .attr("fill", d => colorScale(d.genre));
+
+    shapes.on("click", function(event, d) {
+        const pointKey = `${d.name}-${d.platform}`;
+        const isSelected = selectedPoints.has(pointKey);
+        if (isSelected) {
+            selectedPoints.delete(pointKey);
+            d3.select(this).attr("fill", colorScale(d.genre));
+        } else {
+            selectedPoints.add(pointKey);
+            d3.select(this).attr("fill", "black");
+        }
+        updateSelectedGamesBox();
+        drawBarChart(filteredData.filter(d => selectedPoints.has(`${d.name}-${d.platform}`)));
+    });
+
+    shapes.on("mouseover", (event, d) => {
+        tooltip.transition()
+            .duration(200)
+            .style("opacity", .9);
+        tooltip.html(`Name: ${d.name}<br/>Platform: ${d.platform}<br/>Release Date: ${d.release_date}<br/>Genre: ${d.genre}<br/>Meta Score: ${d.meta_score}<br/>User Review: ${d.user_review}`)
+            .style("left", (event.clientX + 10) + "px")
+            .style("top", (event.clientY - 25) + "px");
+    });
+
+    shapes.on("mousemove", (event) => {
+        tooltip.style("left", (event.clientX + 10) + "px")
+            .style("top", (event.clientY - 25) + "px");
+    });
+
+    shapes.on("mouseout", () => {
+        tooltip.transition()
+            .duration(500)
+            .style("opacity", 0);
+    });
 }
 
+function drawBarChart(selectedData) {
+    const barChartWidth = width;
+    const barChartMargin = { top: 20, right: 30, bottom: 70, left: 40 };
+    const barChartInnerWidth = barChartWidth - barChartMargin.left - barChartMargin.right;
+    const barChartInnerHeight = barChartHeight - barChartMargin.top - barChartMargin.bottom;
+
+    const barChartSvg = d3.select("#barChart")
+        .html("") // Clear previous bar chart
+        .append("svg")
+        .attr("width", barChartWidth + barChartMargin.left + barChartMargin.right)
+        .attr("height", barChartHeight + barChartMargin.top + barChartMargin.bottom)
+        .append("g")
+        .attr("transform", `translate(${barChartMargin.left}, ${barChartMargin.top})`);
+
+    const xBarScale = d3.scaleBand()
+        .domain(selectedData.map(d => d.name))
+        .range([0, barChartInnerWidth])
+        .padding(0.1);
+
+    const yBarScale = d3.scaleLinear()
+        .domain([0, d3.max(selectedData, d => +d.meta_score)])
+        .nice()
+        .range([barChartInnerHeight, 0]);
+
+    barChartSvg.append("g")
+        .attr("transform", `translate(0, ${barChartInnerHeight})`)
+        .call(d3.axisBottom(xBarScale))
+        .selectAll("text")
+        .attr("transform", "rotate(-45)")
+        .style("text-anchor", "end");
+
+    barChartSvg.append("g")
+        .call(d3.axisLeft(yBarScale));
+
+    barChartSvg.selectAll(".bar")
+        .data(selectedData)
+        .enter()
+        .append("rect")
+        .attr("class", "bar")
+        .attr("x", d => xBarScale(d.name))
+        .attr("y", d => yBarScale(+d.meta_score))
+        .attr("width", xBarScale.bandwidth())
+        .attr("height", d => barChartInnerHeight - yBarScale(+d.meta_score))
+        .attr("fill", "steelblue");
+}
