@@ -3,7 +3,6 @@ const height = 500;
 const margin = { top: 20, right: 30, bottom: 30, left: 40 };
 
 let selectedPlatforms = [];
-let selectedGenres = [];
 let selectedAges = [];
 let zoomLevelX = 1;
 let zoomLevelY = 1;
@@ -11,14 +10,14 @@ let brushActive = true;
 let selectedPoints = new Set();
 let activeGenre = null;
 let showSelectedOnly = false;
+let selectedReleaseDate = 2020;
 
 d3.csv("../visualizer_genre.csv").then((dataset) => {
     selectedPlatforms = Array.from(new Set(dataset.map(d => d.platform)));
-    selectedGenres = Array.from(new Set(dataset.map(d => d.genre)));
     selectedAges = Array.from(new Set(dataset.map(d => d.target_age)));
     createCheckboxes(dataset, 'platform', 'checkboxes', selectedPlatforms);
-    createCheckboxes(dataset, 'genre', 'genreCheckboxes', selectedGenres);
     createCheckboxes(dataset, 'target_age', 'ageCheckboxes', selectedAges);
+    createSlider(dataset);
     showScatterPlot(dataset);
 });
 
@@ -44,6 +43,17 @@ function createCheckboxes(data, key, containerId, selectedItems) {
             });
             updateScatterPlot(data);
         });
+}
+
+function createSlider(data) {
+    const slider = d3.select("#releaseDateSlider");
+    const sliderValue = d3.select("#sliderValue");
+
+    slider.on("input", function() {
+        selectedReleaseDate = +this.value;
+        sliderValue.text(selectedReleaseDate);
+        updateScatterPlot(data);
+    });
 }
 
 function showScatterPlot(data) {
@@ -331,7 +341,11 @@ function showScatterPlot(data) {
 }
 
 function updateScatterPlot(data) {
-    const filteredData = data.filter(d => selectedPlatforms.includes(d.platform) && selectedGenres.includes(d.genre) && selectedAges.includes(d.target_age));
+    const filteredData = data.filter(d => 
+        selectedPlatforms.includes(d.platform) && 
+        selectedAges.includes(d.target_age) && 
+        new Date(d.release_date).getFullYear() <= selectedReleaseDate
+    );
 
     const svg = d3.select("#chart svg g");
 
