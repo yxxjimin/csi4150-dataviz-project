@@ -7,6 +7,10 @@ let selectedGenres = [];
 let selectedAges = [];
 let zoomLevelX = 1;
 let zoomLevelY = 1;
+let brushActive = true;
+let selectedPoints = new Set();
+let activeGenre = null;
+let showSelectedOnly = false;
 
 d3.csv("../visualizer_genre.csv").then((dataset) => {
     selectedPlatforms = Array.from(new Set(dataset.map(d => d.platform)));
@@ -85,7 +89,6 @@ function showScatterPlot(data) {
         .style("padding", "5px")
         .style("pointer-events", "none");
 
-    // Calculate overlapping points
     const pointMap = {};
     data.forEach(d => {
         const key = `${d.user_review}-${d.meta_score}`;
@@ -96,13 +99,13 @@ function showScatterPlot(data) {
     });
 
     function adjustPadding(zoomLevelX, zoomLevelY) {
-        const paddingX = 0.025 / zoomLevelX; // Adjust Jittering based on zoom level for x-axis
-        const paddingY = 0.25 / zoomLevelY; // Adjust Jittering based on zoom level for y-axis
+        const paddingX = 0.025 / zoomLevelX;
+        const paddingY = 0.25 / zoomLevelY;
         const updatedData = [];
         Object.keys(pointMap).forEach(key => {
             const points = pointMap[key];
             const n = points.length;
-            const side = Math.ceil(Math.sqrt(n)); // Determine side length of the square grid
+            const side = Math.ceil(Math.sqrt(n));
             const halfSide = (side - 1) / 2;
 
             points.forEach((d, i) => {
@@ -126,6 +129,18 @@ function showScatterPlot(data) {
         .attr("d", d => symbol.type(shapeScale(d.platform))())
         .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
         .attr("fill", d => colorScale(d.genre))
+        .on("click", function(event, d) {
+            const pointKey = `${d.name}-${d.platform}`;
+            const isSelected = selectedPoints.has(pointKey);
+            if (isSelected) {
+                selectedPoints.delete(pointKey);
+                d3.select(this).attr("fill", colorScale(d.genre));
+            } else {
+                selectedPoints.add(pointKey);
+                d3.select(this).attr("fill", "black");
+            }
+            updateSelectedGamesBox();
+        })
         .on("mouseover", (event, d) => {
             tooltip.transition()
                 .duration(200)
@@ -136,7 +151,7 @@ function showScatterPlot(data) {
         })
         .on("mousemove", (event) => {
             tooltip.style("left", (event.clientX + 10) + "px")
-                   .style("top", (event.clientY - 25) + "px");
+                .style("top", (event.clientY - 25) + "px");
         })
         .on("mouseout", () => {
             tooltip.transition()
@@ -165,20 +180,29 @@ function showScatterPlot(data) {
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "4");
 
-    let activeGenre = null;
     const legend = svg.selectAll(".legend")
-        .data(colorScale.domain())
+        .data([...colorScale.domain(), "Selected"])
         .enter().append("g")
         .attr("class", "legend")
         .attr("transform", (d, i) => `translate(0, ${i * 20})`)
         .on("click", function(event, genre) {
             const shapes = svg.selectAll(".point");
-            if (activeGenre === genre) {
-                shapes.style("opacity", 1);
-                activeGenre = null;
+            if (genre === "Selected") {
+                if (showSelectedOnly) {
+                    shapes.style("opacity", 1);
+                    showSelectedOnly = false;
+                } else {
+                    shapes.style("opacity", d => selectedPoints.has(`${d.name}-${d.platform}`) ? 1 : 0.1);
+                    showSelectedOnly = true;
+                }
             } else {
-                shapes.style("opacity", d => d.genre === genre ? 1 : 0.1);
-                activeGenre = genre;
+                if (activeGenre === genre) {
+                    shapes.style("opacity", 1);
+                    activeGenre = null;
+                } else {
+                    shapes.style("opacity", d => d.genre === genre ? 1 : 0.1);
+                    activeGenre = genre;
+                }
             }
         });
 
@@ -186,7 +210,7 @@ function showScatterPlot(data) {
         .attr("x", width + 20)
         .attr("width", 18)
         .attr("height", 18)
-        .style("fill", colorScale);
+        .style("fill", d => d === "Selected" ? "black" : colorScale(d));
 
     legend.append("text")
         .attr("x", width + 45)
@@ -199,7 +223,7 @@ function showScatterPlot(data) {
         .extent([[0, 0], [width, height]])
         .on("end", brushended);
 
-    svg.append("g")
+    let brushGroup = svg.append("g")
         .attr("class", "brush")
         .call(brush);
 
@@ -207,9 +231,26 @@ function showScatterPlot(data) {
         .text("Reset Zoom")
         .on("click", resetZoom);
 
+    d3.select("body").on("keydown", function(event) {
+        if (event.key === "t") {
+            toggleBrush();
+        }
+    });
+
+    function toggleBrush() {
+        if (brushActive) {
+            brushGroup.remove();
+        } else {
+            brushGroup = svg.append("g")
+                .attr("class", "brush")
+                .call(brush);
+        }
+        brushActive = !brushActive;
+    }
+
     function brushended(event) {
         if (!event.selection) return;
-
+        if (!brushActive) return;
         const [[x0, y0], [x1, y1]] = event.selection;
         const selectedData = data.filter(d => {
             const x = xScale(+d.user_review);
@@ -272,7 +313,7 @@ function showScatterPlot(data) {
             })
             .on("mousemove", (event) => {
                 tooltip.style("left", (event.clientX + 10) + "px")
-                .style("top", (event.clientY - 25) + "px");
+                    .style("top", (event.clientY - 25) + "px");
             })
             .on("mouseout", () => {
                 tooltip.transition()
@@ -282,6 +323,11 @@ function showScatterPlot(data) {
     }
 
     attachTooltip();
+
+    function updateSelectedGamesBox() {
+        const selectedGamesDiv = d3.select("#selectedGames");
+        selectedGamesDiv.html(Array.from(selectedPoints).map(p => p.split('-')[0]).join(", "));
+    }
 }
 
 function updateScatterPlot(data) {
@@ -321,3 +367,4 @@ function updateScatterPlot(data) {
         .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
         .attr("fill", d => colorScale(d.genre));
 }
+
