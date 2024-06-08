@@ -1,12 +1,25 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <link rel="stylesheet" type="text/css" href="style.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
-    <script src="script.js" defer></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pie Charts by Platform</title>
+    <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-    <div class="chart-container" id="chart-genre"></div>
-    <div class="chart-container" id="chart-target-age"></div>
+    <div class="chart-container">
+        <h3>PC</h3>
+        <div id="pie-chart-pc" class="chart"></div>
+    </div>
+    <div class="chart-container">
+        <h3>Switch</h3>
+        <div id="pie-chart-switch" class="chart"></div>
+    </div>
+    <div class="chart-container">
+        <h3>PlayStation</h3>
+        <div id="pie-chart-playstation" class="chart"></div>
+    </div>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>

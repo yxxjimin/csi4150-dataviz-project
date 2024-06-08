@@ -1,85 +1,67 @@
-const width = 600;
-const height = 300;
-const margin = 40;
-const radius = Math.min(width, height) / 2 - margin;
+const platforms = ["PC", "Switch", "PlayStation"];
+const targetAges = ["E", "M", "T"];
 
-function createSvg(containerId) {
-    return d3.select(containerId)
+d3.csv("../visualizer_genre.csv").then(function(data) {
+    platforms.forEach(platform => {
+        createPieChart(platform, `#pie-chart-${platform.toLowerCase()}`, data);
+    });
+});
+
+function createPieChart(platform, selector, data) {
+    const filteredData = data.filter(d => d.platform === platform);
+    const counts = targetAges.map(age => ({
+        age: age,
+        count: filteredData.filter(d => d.target_age === age).length
+    }));
+
+    const width = 300;
+    const height = 300;
+    const radius = Math.min(width, height) / 2;
+
+    const svg = d3.select(selector)
         .append("svg")
-        .attr("width", width)
+        .attr("width", width + 100)
         .attr("height", height)
         .append("g")
         .attr("transform", `translate(${width / 2}, ${height / 2})`);
-}
 
-function aggregateData(data, key) {
-    const aggregation = d3.rollup(
-        data,
-        v => v.length,
-        d => d[key]
-    );
-    return Array.from(aggregation, ([key, value]) => ({ key, value }));
-}
-
-function drawPieChart(svg, data) {
     const color = d3.scaleOrdinal()
-        .domain(data.map(d => d.key))
+        .domain(targetAges)
         .range(d3.schemeCategory10);
 
     const pie = d3.pie()
-        .value(d => d.value);
+        .value(d => d.count)
+        .sort((a, b) => targetAges.indexOf(a.age) - targetAges.indexOf(b.age));
 
-    const data_ready = pie(data);
+    const path = d3.arc()
+        .outerRadius(radius)
+        .innerRadius(0);
 
-    const arc = d3.arc()
-        .innerRadius(0)
-        .outerRadius(radius);
-
-    svg.selectAll('path')
-        .data(data_ready)
-        .enter()
-        .append('path')
-        .attr('d', arc)
-        .attr('fill', d => color(d.data.key))
-        .attr("stroke", "white")
-        .style("stroke-width", "2px")
-        .style("opacity", 0.7);
-
-    // Add legend
-    const legend = svg.append("g")
-        .attr("transform", `translate(${radius + 10}, -${radius})`);
-
-    const legendItem = legend.selectAll(".legend-item")
-        .data(data)
+    const arc = svg.selectAll("arc")
+        .data(pie(counts))
         .enter()
         .append("g")
-        .attr("class", "legend-item")
-        .attr("transform", (d, i) => `translate(0, ${i * 20})`);
+        .attr("class", "arc");
 
-    legendItem.append("rect")
+    arc.append("path")
+        .attr("d", path)
+        .attr("fill", d => color(d.data.age));
+
+    const legend = svg.selectAll(".legend")
+        .data(counts)
+        .enter()
+        .append("g")
+        .attr("transform", (d, i) => `translate(${radius + 20}, ${i * 20 - radius / 2})`)
+        .attr("class", "legend");
+
+    legend.append("rect")
         .attr("width", 18)
         .attr("height", 18)
-        .attr("fill", d => color(d.key));
+        .style("fill", d => color(d.age));
 
-    legendItem.append("text")
+    legend.append("text")
         .attr("x", 24)
         .attr("y", 9)
-        .attr("dy", "0.35em")
-        .text(d => d.key)
-        .style("font-size", 12);
+        .attr("dy", ".35em")
+        .text(d => `${d.age}`);
 }
-
-d3.csv("../visualizer_genre.csv").then((dataset) => {
-    dataset.forEach(d => {
-        d.release_year = new Date(d.release_date).getFullYear();
-    });
-
-    const genreData = aggregateData(dataset, 'genre');
-    const targetAgeData = aggregateData(dataset, 'target_age');
-
-    const svgGenre = createSvg("#chart-genre");
-    const svgTargetAge = createSvg("#chart-target-age");
-
-    drawPieChart(svgGenre, genreData);
-    drawPieChart(svgTargetAge, targetAgeData);
-});
