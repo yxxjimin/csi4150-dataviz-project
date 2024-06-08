@@ -96,7 +96,7 @@ function drawBarCharts(selectedData) {
     const barChartInnerHeight = barChartHeight - barChartMargin.top - barChartMargin.bottom;
 
     const minMetaScore = d3.min(selectedData, d => +d.meta_score) - 1;
-    const minUserReview = d3.min(selectedData, d => +d.user_review) - 0.5;
+    const minUserReview = d3.min(selectedData, d => +d.user_review) - 0.1;
 
     const barChartSvgMeta = d3.select("#barChartMeta")
         .html("") // Clear previous bar chart
