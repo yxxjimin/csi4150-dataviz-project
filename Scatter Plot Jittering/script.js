@@ -96,7 +96,7 @@ function drawBarCharts(selectedData) {
     const barChartInnerHeight = barChartHeight - barChartMargin.top - barChartMargin.bottom;
 
     const minMetaScore = d3.min(selectedData, d => +d.meta_score) - 1;
-    const minUserReview = d3.min(selectedData, d => +d.user_review) - 0.1;
+    const minUserReview = d3.min(selectedData, d => +d.user_review) - 0.5;
 
     const barChartSvgMeta = d3.select("#barChartMeta")
         .html("") // Clear previous bar chart
@@ -276,10 +276,12 @@ function showScatterPlot(data) {
                 .style("opacity", 0);
         });
 
+    // Initial average lines
     const avgUserReview = d3.mean(data, d => +d.user_review);
     const avgMetaScore = d3.mean(data, d => +d.meta_score);
 
     svg.append("line")
+        .attr("class", "avg-line")
         .attr("x1", xScale(avgUserReview))
         .attr("x2", xScale(avgUserReview))
         .attr("y1", 0)
@@ -289,6 +291,7 @@ function showScatterPlot(data) {
         .attr("stroke-dasharray", "4");
 
     svg.append("line")
+        .attr("class", "avg-line")
         .attr("x1", 0)
         .attr("x2", width)
         .attr("y1", yScale(avgMetaScore))
@@ -397,6 +400,33 @@ function showScatterPlot(data) {
             .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
             .attr("d", d => selectedData.includes(d) ? symbol.type(shapeScale(d.platform))() : "")
             .on("end", attachTooltip);
+
+        svg.selectAll(".avg-line").remove();
+
+        if (selectedData.length > 0) {
+            const avgUserReview = d3.mean(selectedData, d => +d.user_review);
+            const avgMetaScore = d3.mean(selectedData, d => +d.meta_score);
+
+            svg.append("line")
+                .attr("class", "avg-line")
+                .attr("x1", xScale(avgUserReview))
+                .attr("x2", xScale(avgUserReview))
+                .attr("y1", 0)
+                .attr("y2", height)
+                .attr("stroke", "grey")
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", "4");
+
+            svg.append("line")
+                .attr("class", "avg-line")
+                .attr("x1", 0)
+                .attr("x2", width)
+                .attr("y1", yScale(avgMetaScore))
+                .attr("y2", yScale(avgMetaScore))
+                .attr("stroke", "grey")
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", "4");
+        }
     }
 
     function resetZoom() {
@@ -416,6 +446,32 @@ function showScatterPlot(data) {
             .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
             .attr("d", d => symbol.type(shapeScale(d.platform))())
             .on("end", attachTooltip);
+
+        svg.selectAll(".avg-line").remove();
+
+        // Re-add the initial average lines
+        const avgUserReview = d3.mean(data, d => +d.user_review);
+        const avgMetaScore = d3.mean(data, d => +d.meta_score);
+
+        svg.append("line")
+            .attr("class", "avg-line")
+            .attr("x1", xScale(avgUserReview))
+            .attr("x2", xScale(avgUserReview))
+            .attr("y1", 0)
+            .attr("y2", height)
+            .attr("stroke", "grey")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "4");
+
+        svg.append("line")
+            .attr("class", "avg-line")
+            .attr("x1", 0)
+            .attr("x2", width)
+            .attr("y1", yScale(avgMetaScore))
+            .attr("y2", yScale(avgMetaScore))
+            .attr("stroke", "grey")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "4");
     }
 
     function attachTooltip() {
@@ -518,5 +574,30 @@ function updateScatterPlot(data) {
             .style("opacity", 0);
     });
 
-    updateSelectedGamesBox();
+    svg.selectAll(".avg-line").remove();
+
+    if (filteredData.length > 0) {
+        const avgUserReview = d3.mean(filteredData, d => +d.user_review);
+        const avgMetaScore = d3.mean(filteredData, d => +d.meta_score);
+
+        svg.append("line")
+            .attr("class", "avg-line")
+            .attr("x1", xScale(avgUserReview))
+            .attr("x2", xScale(avgUserReview))
+            .attr("y1", 0)
+            .attr("y2", height)
+            .attr("stroke", "grey")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "4");
+
+        svg.append("line")
+            .attr("class", "avg-line")
+            .attr("x1", 0)
+            .attr("x2", width)
+            .attr("y1", yScale(avgMetaScore))
+            .attr("y2", yScale(avgMetaScore))
+            .attr("stroke", "grey")
+            .attr("stroke-width", 2)
+            .attr("stroke-dasharray", "4");
+    }
 }

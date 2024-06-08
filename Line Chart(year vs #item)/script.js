@@ -2,7 +2,7 @@ const width = 1000;
 const height = 500;
 const margin = { top: 20, right: 150, bottom: 30, left: 50 };
 
-d3.csv("../visualizer_preprocess.csv").then((dataset) => {
+d3.csv("../visualizer_genre.csv").then((dataset) => {
     dataset.forEach(d => {
         d.release_year = new Date(d.release_date).getFullYear();
     });
