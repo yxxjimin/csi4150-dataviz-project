@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { ScrollDown, ScrollUp } from './components/ScrollButton';
 import { GenreScatterPlot } from './components/GenreScatterPlot';
 import { ScatterPlot } from './components/ScatterPlot';
+import { PieChart } from './components/PieChart';
 
 
 
@@ -19,7 +20,7 @@ const OnBoarding = () => {
 
 const Intro = () => {
   return (
-    <div className='relative w-screen h-screen text-center flex flex-col justify-center items-center space-y-6 font-display border border-black'>
+    <div className='relative w-screen h-screen text-center flex flex-col justify-center items-center space-y-6 font-display'>
       <h1 className="text-3xl font-bold">
         뭐라고하지
       </h1>
@@ -38,6 +39,7 @@ const App = () => {
       <OnBoarding />
       <Intro />
       <ScatterPlot />
+      <PieChart />
     </>
   )
 };

@@ -3,14 +3,14 @@ import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 import { useEffect } from "react";
 
-const width = window.innerWidth * 0.8;
+const width = window.innerWidth * 0.55;
 const height = window.innerHeight * 0.6;
 const barChartHeight = 300;
 const margin = { 
-  top: window.innerHeight * 0.2, 
-  right: window.innerWidth * 0.1, 
+  top: window.innerHeight * 0.1, 
+  right: window.innerWidth * 0.2,
   bottom: 0, 
-  left: window.innerWidth * 0.1
+  left: window.innerWidth * 0.05
 };
 
 let selectedPlatforms = [];
@@ -41,10 +41,10 @@ function createCheckboxes(data, key, containerId, selectedItems) {
       checkboxContainer.selectAll("input").each(function(d) {
         if (d3.select(this).property("checked")) {
           selectedItems.push(d);
-        }
-      });
-      updateScatterPlot(data);
-    });
+          }
+          });
+          updateScatterPlot(data);
+          });
 }
 
 function createSlider(data) {
@@ -326,7 +326,12 @@ function showScatterPlot(data) {
     .attr("stroke-width", 2)
     .attr("stroke-dasharray", "4");
 
-  const legend = svg.selectAll(".legend")
+  // const legend = svg.selectAll(".legend")
+  const legend = d3.select("#legends")
+    .append("svg")
+    .attr("height", 220)
+    .append("g")
+    .selectAll(".legend")
     .data([...colorScale.domain(), "Selected"])
     .enter().append("g")
     .attr("class", "legend")
@@ -353,13 +358,13 @@ function showScatterPlot(data) {
     });
 
   legend.append("rect")
-    .attr("x", width + 20)
+    .attr("x", 0)
     .attr("width", 18)
     .attr("height", 18)
     .style("fill", d => d === "Selected" ? "black" : colorScale(d));
 
   legend.append("text")
-    .attr("x", width + 45)
+    .attr("x", 25)
     .attr("y", 9)
     .attr("dy", ".35em")
     .style("text-anchor", "start")
@@ -648,14 +653,12 @@ function updateScatterPlot(data) {
       .style("opacity", 0);
   });
 
-  svg.selectAll(".avg-line").remove();
-
   if (filteredData.length > 0) {
     const avgUserReview = d3.mean(filteredData, d => +d.user_review);
     const avgMetaScore = d3.mean(filteredData, d => +d.meta_score);
 
-    svg.append("line")
-      .attr("class", "avg-line")
+    // svg.append("line")
+    svg.select("#x-avg")
       .attr("x1", xScale(avgUserReview))
       .attr("x2", xScale(avgUserReview))
       .attr("y1", 0)
@@ -664,8 +667,7 @@ function updateScatterPlot(data) {
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "4");
 
-    svg.append("line")
-      .attr("class", "avg-line")
+    svg.select("#y-avg")
       .attr("x1", 0)
       .attr("x2", width)
       .attr("y1", yScale(avgMetaScore))
@@ -704,27 +706,48 @@ export const ScatterPlot = () => {
   }, []);
 
   return (
-    <div className="relative w-screen text-center flex flex-col justify-center items-center space-y-6 font-display">
-      <div 
-        id="chart"
-        className="w-screen flex flex-col justify-center"
-      ></div>
+    <div className="relative w-screen text-center flex flex-col justify-center items-center font-display">
+      <h1 className="text-3xl font-bold">
+        Drag, Toggle and Select
+      </h1>
+      <div className="flex w-full p-20">
+        <div 
+          id="chart"
+          className="w-10/12 flex flex-col justify-center"
+        ></div>
+        <div className="w-2/12 flex flex-col space-y-4 text-left">
+          <div id="checkboxes" className="flex flex-col">
+            <h3 className="text-lg font-bold mb-2">Platforms</h3>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold mb-2">Target Age</h3>
+            <div id="ageCheckboxes" className="flex justify-between"></div>
+          </div>
+          <div id="sliderContainer" className="w-4/5">
+            <label htmlFor="releaseDateSlider">Filter by Release Date:</label>
+            <div id="releaseDateSlider" className="w-full"></div>
+            <span id="sliderValue">2020</span>
+          </div>
+          <div>
+            <h3 className="text-lg font-bold mb-2">Genre</h3>
+            <div id="legends"></div>
+          </div>
+          <button 
+            id="reset-zoom"
+            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+          >
+            Reset Zoom
+          </button>
+        </div>
+      </div>
       <div 
         id="tooltip"
         className="absolute z-10 opacity-0 bg-white"
       ></div>
-      <div id="checkboxes"></div>
-      <div id="ageCheckboxes"></div>
-      <div id="sliderContainer" className="w-1/2">
-        <label htmlFor="releaseDateSlider">Filter by Release Date:</label>
-        <div id="releaseDateSlider" className="w-full"></div>
-        <span id="sliderValue">2020</span>
-      </div>
-      <button id="reset-zoom">Reset Zoom</button>
       <div
         className="flex jusitfy-between"
       >
-        <div id="selectedGames"></div>
+        {/* <div id="selectedGames"></div> */}
         <div id="barChartMeta"></div>
         <div id="barChartUser"></div>
       </div>
