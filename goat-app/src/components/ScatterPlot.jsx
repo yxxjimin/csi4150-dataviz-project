@@ -305,6 +305,7 @@ function showScatterPlot(data) {
   const avgMetaScore = d3.mean(data, d => +d.meta_score);
 
   svg.append("line")
+    .attr("id", "x-avg")
     .attr("class", "avg-line")
     .attr("x1", xScale(avgUserReview))
     .attr("x2", xScale(avgUserReview))
@@ -315,6 +316,7 @@ function showScatterPlot(data) {
     .attr("stroke-dasharray", "4");
 
   svg.append("line")
+    .attr("id", "y-avg")
     .attr("class", "avg-line")
     .attr("x1", 0)
     .attr("x2", width)
@@ -425,13 +427,11 @@ function showScatterPlot(data) {
       .attr("d", d => selectedData.includes(d) ? symbol.type(shapeScale(d.platform))() : "")
       .on("end", attachTooltip);
 
-    svg.selectAll(".avg-line").remove();
-
     if (selectedData.length > 0) {
-      const avgUserReview = d3.mean(selectedData, d => +d.user_review);
-      const avgMetaScore = d3.mean(selectedData, d => +d.meta_score);
-
-      svg.append("line")
+      // const avgUserReview = d3.mean(selectedData, d => +d.user_review);
+      // const avgMetaScore = d3.mean(selectedData, d => +d.meta_score);
+    
+      svg.select("#x-avg").transition(t)
         .attr("class", "avg-line")
         .attr("x1", xScale(avgUserReview))
         .attr("x2", xScale(avgUserReview))
@@ -441,7 +441,7 @@ function showScatterPlot(data) {
         .attr("stroke-width", 2)
         .attr("stroke-dasharray", "4");
 
-      svg.append("line")
+      svg.select("#y-avg").transition(t)
         .attr("class", "avg-line")
         .attr("x1", 0)
         .attr("x2", width)
@@ -467,17 +467,15 @@ function showScatterPlot(data) {
     const updatedData = adjustPadding(zoomLevelX, zoomLevelY);
 
     svg.selectAll(".point").transition(t)
-      .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
-      .attr("d", d => symbol.type(shapeScale(d.platform))())
-      .on("end", attachTooltip);
-
-    svg.selectAll(".avg-line").remove();
-
+    .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
+    .attr("d", d => symbol.type(shapeScale(d.platform))())
+    .on("end", attachTooltip);
+    
     // Re-add the initial average lines
     const avgUserReview = d3.mean(data, d => +d.user_review);
     const avgMetaScore = d3.mean(data, d => +d.meta_score);
-
-    svg.append("line")
+    
+    svg.select("#x-avg").transition(t)
       .attr("class", "avg-line")
       .attr("x1", xScale(avgUserReview))
       .attr("x2", xScale(avgUserReview))
@@ -487,7 +485,7 @@ function showScatterPlot(data) {
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "4");
 
-    svg.append("line")
+    svg.select("#y-avg").transition(t)
       .attr("class", "avg-line")
       .attr("x1", 0)
       .attr("x2", width)
