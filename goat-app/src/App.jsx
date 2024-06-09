@@ -3,6 +3,7 @@ import { ScrollDown, ScrollUp } from './components/ScrollButton';
 import { GenreScatterPlot } from './components/GenreScatterPlot';
 import { ScatterPlot } from './components/ScatterPlot';
 import { PieChart } from './components/PieChart';
+import { GenrePlot } from './components/GenrePlot';
 
 
 
@@ -40,6 +41,7 @@ const App = () => {
       <Intro />
       <ScatterPlot />
       <PieChart />
+      <GenreScatterPlot />
     </>
   )
 };
