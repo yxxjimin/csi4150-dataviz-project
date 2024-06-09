@@ -1,8 +1,10 @@
 import * as d3 from "d3";
-import {useState, useEffect } from "react";
+import noUiSlider from 'nouislider';
+import 'nouislider/dist/nouislider.css';
+import { useEffect } from "react";
 
 const width = window.innerWidth * 0.8;
-const height = window.innerHeight * 0.8;
+const height = window.innerHeight * 0.6;
 const barChartHeight = 300;
 const margin = { 
   top: window.innerHeight * 0.2, 
@@ -19,41 +21,151 @@ let brushActive = true;
 let selectedPoints = new Set();
 let activeGenre = null;
 let showSelectedOnly = false;
-let selectedReleaseDate = 2020;
+let selectedReleaseDateRange = [1996, 2024];
 
 function createCheckboxes(data, key, containerId, selectedItems) {
   const items = Array.from(new Set(data.map(d => d[key])));
   const checkboxContainer = d3.select(`#${containerId}`);
 
   checkboxContainer.selectAll("label")
-      .data(items)
-      .enter()
-      .append("label")
-      .text(d => d)
-      .append("input")
-      .attr("type", "checkbox")
-      .attr("value", d => d)
-      .attr("checked", true)
-      .on("change", function() {
-          selectedItems.length = 0;
-          checkboxContainer.selectAll("input").each(function(d) {
-              if (d3.select(this).property("checked")) {
-                  selectedItems.push(d);
-              }
-          });
-          updateScatterPlot(data);
+    .data(items)
+    .enter()
+    .append("label")
+    .text(d => d)
+    .append("input")
+    .attr("type", "checkbox")
+    .attr("value", d => d)
+    .attr("checked", true)
+    .on("change", function() {
+      selectedItems.length = 0;
+      checkboxContainer.selectAll("input").each(function(d) {
+        if (d3.select(this).property("checked")) {
+          selectedItems.push(d);
+        }
       });
+      updateScatterPlot(data);
+    });
 }
 
 function createSlider(data) {
-  const slider = d3.select("#releaseDateSlider");
-  const sliderValue = d3.select("#sliderValue");
-
-  slider.on("input", function() {
-      selectedReleaseDate = +this.value;
-      sliderValue.text(selectedReleaseDate);
-      updateScatterPlot(data);
+  const slider = document.getElementById('releaseDateSlider');
+  noUiSlider.create(slider, {
+    start: selectedReleaseDateRange,
+    connect: true,
+    range: {
+      'min': 1996,
+      'max': 2024
+    },
+    step: 1,
+    tooltips: true,
+    format: {
+      to: function (value) {
+        return Math.round(value);
+      },
+      from: function (value) {
+        return Number(value);
+      }
+    }
   });
+
+  slider.noUiSlider.on('update', function(values) {
+    selectedReleaseDateRange = values.map(v => parseInt(v));
+    d3.select("#sliderValue").text(`${selectedReleaseDateRange[0]} - ${selectedReleaseDateRange[1]}`);
+    updateScatterPlot(data);
+  });
+}
+
+function updateSelectedGamesBox() {
+  const selectedGamesDiv = d3.select("#selectedGames");
+  selectedGamesDiv.html(Array.from(selectedPoints).map(p => p.split('-')[0]).join(", "));
+}
+
+function drawBarCharts(selectedData) {
+  const barChartWidth = width / 2;
+  const barChartMargin = { 
+    top: 20, 
+    right: 30, 
+    bottom: 70, 
+    left: 40 
+  };
+  const barChartInnerWidth = barChartWidth - barChartMargin.left - barChartMargin.right;
+  const barChartInnerHeight = barChartHeight - barChartMargin.top - barChartMargin.bottom;
+
+  const minMetaScore = d3.min(selectedData, d => +d.meta_score) - 1;
+  const minUserReview = d3.min(selectedData, d => +d.user_review) - 0.1;
+
+  const barChartSvgMeta = d3.select("#barChartMeta")
+    .html("") // Clear previous bar chart
+    .append("svg")
+    .attr("width", barChartWidth + barChartMargin.left + barChartMargin.right)
+    .attr("height", barChartHeight + barChartMargin.top + barChartMargin.bottom)
+    .append("g")
+    .attr("transform", `translate(${barChartMargin.left}, ${barChartMargin.top})`);
+
+  const barChartSvgUser = d3.select("#barChartUser")
+    .html("") // Clear previous bar chart
+    .append("svg")
+    .attr("width", barChartWidth + barChartMargin.left + barChartMargin.right)
+    .attr("height", barChartHeight + barChartMargin.top + barChartMargin.bottom)
+    .append("g")
+    .attr("transform", `translate(${barChartMargin.left}, ${barChartMargin.top})`);
+
+  const xBarScale = d3.scaleBand()
+    .domain(selectedData.map(d => d.name))
+    .range([0, barChartInnerWidth])
+    .padding(0.2);  // Adjust padding to make bars skinnier
+
+  const yBarScaleMeta = d3.scaleLinear()
+    .domain([minMetaScore, d3.max(selectedData, d => +d.meta_score)])
+    .nice()
+    .range([barChartInnerHeight, 0]);
+
+  const yBarScaleUser = d3.scaleLinear()
+    .domain([minUserReview, d3.max(selectedData, d => +d.user_review)])
+    .nice()
+    .range([barChartInnerHeight, 0]);
+
+  barChartSvgMeta.append("g")
+    .attr("transform", `translate(0, ${barChartInnerHeight})`)
+    .call(d3.axisBottom(xBarScale))
+    .selectAll("text")
+    .attr("transform", "rotate(-45)")
+    .style("text-anchor", "end");
+
+  barChartSvgMeta.append("g")
+    .call(d3.axisLeft(yBarScaleMeta));
+
+  barChartSvgMeta.selectAll(".bar")
+    .data(selectedData)
+    .enter()
+    .append("rect")
+    .attr("class", "bar")
+    .attr("x", d => xBarScale(d.name))
+    .attr("y", d => yBarScaleMeta(+d.meta_score))
+    .attr("width", xBarScale.bandwidth())
+    .attr("height", d => barChartInnerHeight - yBarScaleMeta(+d.meta_score))
+    .attr("fill", "steelblue");
+
+  barChartSvgUser.append("g")
+    .attr("transform", `translate(0, ${barChartInnerHeight})`)
+    .call(d3.axisBottom(xBarScale))
+    .selectAll("text")
+    .attr("transform", "rotate(-45)")
+    .style("text-anchor", "end");
+
+  barChartSvgUser.append("g")
+    .call(d3.axisLeft(yBarScaleUser));
+
+  barChartSvgUser.selectAll(".bar")
+    .data(selectedData)
+    .enter()
+    .append("rect")
+    .attr("class", "bar")
+    .attr("x", d => xBarScale(d.name))
+    .attr("y", d => yBarScaleUser(+d.user_review))
+    .attr("width", xBarScale.bandwidth())
+    .attr("height", d => barChartInnerHeight - yBarScaleUser(+d.user_review))
+    .attr("fill", "orange");
 }
 
 function showScatterPlot(data) {
@@ -116,7 +228,7 @@ function showScatterPlot(data) {
         updatedData.push(d);
       });
     });
-    
+  
     return updatedData;
   }
 
@@ -140,6 +252,7 @@ function showScatterPlot(data) {
         selectedPoints.add(pointKey);
         d3.select(this).attr("fill", "black");
       }
+  
       updateSelectedGamesBox();
       drawBarCharts(data.filter(d => selectedPoints.has(`${d.name}-${d.platform}`)));
     })
@@ -147,25 +260,52 @@ function showScatterPlot(data) {
       d3.select("#tooltip").transition()
         .duration(200)
         .style("opacity", .9);
-      d3.select("#tooltip").html(`Name: ${d.name}<br/>Platform: ${d.platform}<br/>Release Date: ${d.release_date}<br/>Genre: ${d.genre}<br/>Meta Score: ${d.meta_score}<br/>User Review: ${d.user_review}`)
+      d3.select("#tooltip").html(`
+        <table class="table-auto text-sm text-black">
+          <tr>
+            <td class="border border-slate-500 bg-slate-200">Name</td>
+            <td class="border border-slate-500">${d.name}</td>
+          </tr>
+          <tr>
+            <td class="border border-slate-500 bg-slate-200">Platform</td>
+            <td class="border border-slate-500">${d.platform}</td>
+          </tr>
+          <tr>
+            <td class="border border-slate-500 bg-slate-200">Release Date</td>
+            <td class="border border-slate-500">${d.release_date}</td>
+          </tr>
+          <tr>
+            <td class="border border-slate-500 bg-slate-200">Genre</td>
+            <td class="border border-slate-500">${d.genre}</td>
+          </tr>
+          <tr>
+            <td class="border border-slate-500 bg-slate-200">Meta Score</td>
+            <td class="border border-slate-500">${d.meta_score}</td>
+          </tr>
+          <tr>
+            <td class="border border-slate-500 bg-slate-200">User Review</td>
+            <td class="border border-slate-500">${d.user_review}</td>
+          </tr>
+        </table>`)
         .style("left", (event.clientX + 10) + "px")
         .style("top", (event.clientY - 25) + "px");
       })
-    .on("mousemove", (event) => {
-      d3.select("#tooltip").style("left", (event.clientX + 10) + "px")
-        .style("top", (event.clientY - 25) + "px");
-    })
-    .on("mouseout", () => {
-      d3.select("#tooltip").transition()
-        .duration(500)
-        .style("opacity", 0);
-    });
+      .on("mousemove", (event) => {
+        d3.select("#tooltip").style("left", (event.clientX + 10) + "px")
+          .style("top", (event.clientY - 25) + "px");
+      })
+      .on("mouseout", () => {
+        d3.select("#tooltip").transition()
+          .duration(500)
+          .style("opacity", 0);
+      });
 
+  // Initial average lines
   const avgUserReview = d3.mean(data, d => +d.user_review);
   const avgMetaScore = d3.mean(data, d => +d.meta_score);
 
   svg.append("line")
-    .attr("id", "x-avg")
+    .attr("class", "avg-line")
     .attr("x1", xScale(avgUserReview))
     .attr("x2", xScale(avgUserReview))
     .attr("y1", 0)
@@ -175,7 +315,7 @@ function showScatterPlot(data) {
     .attr("stroke-dasharray", "4");
 
   svg.append("line")
-    .attr("id", "y-avg")
+    .attr("class", "avg-line")
     .attr("x1", 0)
     .attr("x2", width)
     .attr("y1", yScale(avgMetaScore))
@@ -187,60 +327,60 @@ function showScatterPlot(data) {
   const legend = svg.selectAll(".legend")
     .data([...colorScale.domain(), "Selected"])
     .enter().append("g")
-      .attr("class", "legend")
-      .attr("transform", (d, i) => `translate(0, ${i * 20})`)
-      .on("click", function(event, genre) {
-        const shapes = svg.selectAll(".point");
-        if (genre === "Selected") {
-          if (showSelectedOnly) {
-            shapes.style("opacity", 1);
-            showSelectedOnly = false;
-          } else {
-            shapes.style("opacity", d => selectedPoints.has(`${d.name}-${d.platform}`) ? 1 : 0.1);
-            showSelectedOnly = true;
-          }
+    .attr("class", "legend")
+    .attr("transform", (d, i) => `translate(0, ${i * 20})`)
+    .on("click", function(event, genre) {
+      const shapes = svg.selectAll(".point");
+      if (genre === "Selected") {
+        if (showSelectedOnly) {
+          shapes.style("opacity", 1);
+          showSelectedOnly = false;
         } else {
-          if (activeGenre === genre) {
-            shapes.style("opacity", 1);
-            activeGenre = null;
-          } else {
-            shapes.style("opacity", d => d.genre === genre ? 1 : 0.1);
-            activeGenre = genre;
-          }
+          shapes.style("opacity", d => selectedPoints.has(`${d.name}-${d.platform}`) ? 1 : 0.1);
+          showSelectedOnly = true;
         }
-      });
+      } else {
+        if (activeGenre === genre) {
+          shapes.style("opacity", 1);
+          activeGenre = null;
+        } else {
+          shapes.style("opacity", d => d.genre === genre ? 1 : 0.1);
+          activeGenre = genre;
+        }
+      }
+    });
 
   legend.append("rect")
-    .attr("x", width)
+    .attr("x", width + 20)
     .attr("width", 18)
     .attr("height", 18)
     .style("fill", d => d === "Selected" ? "black" : colorScale(d));
 
   legend.append("text")
-    .attr("x", width + 25)
+    .attr("x", width + 45)
     .attr("y", 9)
     .attr("dy", ".35em")
     .style("text-anchor", "start")
     .text(d => d);
 
   const brush = d3.brush()
-      .extent([[0, 0], [width, height]])
-      .on("end", brushended);
+    .extent([[0, 0], [width, height]])
+    .on("end", brushended);
 
   let brushGroup = svg.append("g")
-      .attr("class", "brush")
-      .call(brush);
+    .attr("class", "brush")
+    .call(brush);
 
   d3.select("#reset-zoom")
-      .on("click", resetZoom);
+    .text("Reset Zoom")
+    .on("click", resetZoom);
 
   d3.select("body").on("keydown", function(event) {
-      if (event.key === "t") {
-          toggleBrush();
-      }
+    if (event.key === "t") {
+      toggleBrush();
+    }
   });
 
-  // Brush utilities
   function toggleBrush() {
     if (brushActive) {
       brushGroup.remove();
@@ -259,7 +399,6 @@ function showScatterPlot(data) {
     const selectedData = data.filter(d => {
       const x = xScale(+d.user_review);
       const y = yScale(+d.meta_score);
-      
       return x0 <= x && x <= x1 && y0 <= y && y <= y1;
     });
 
@@ -279,32 +418,39 @@ function showScatterPlot(data) {
     xAxisGroup.transition(t).call(xAxis);
     yAxisGroup.transition(t).call(yAxis);
 
-    svg.select("#x-avg")
-      .transition(t)
-      .attr("x1", xScale(avgUserReview))
-      .attr("x2", xScale(avgUserReview))
-      .attr("y1", 0)
-      .attr("y2", height)
-      .attr("stroke", "grey")
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "4");
-
-    svg.select("#y-avg")
-      .transition(t)
-      .attr("x1", 0)
-      .attr("x2", width)
-      .attr("y1", yScale(avgMetaScore))
-      .attr("y2", yScale(avgMetaScore))
-      .attr("stroke", "grey")
-      .attr("stroke-width", 2)
-      .attr("stroke-dasharray", "4");
-
     const updatedData = adjustPadding(zoomLevelX, zoomLevelY);
 
     svg.selectAll(".point").transition(t)
       .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
       .attr("d", d => selectedData.includes(d) ? symbol.type(shapeScale(d.platform))() : "")
       .on("end", attachTooltip);
+
+    svg.selectAll(".avg-line").remove();
+
+    if (selectedData.length > 0) {
+      const avgUserReview = d3.mean(selectedData, d => +d.user_review);
+      const avgMetaScore = d3.mean(selectedData, d => +d.meta_score);
+
+      svg.append("line")
+        .attr("class", "avg-line")
+        .attr("x1", xScale(avgUserReview))
+        .attr("x2", xScale(avgUserReview))
+        .attr("y1", 0)
+        .attr("y2", height)
+        .attr("stroke", "grey")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "4");
+
+      svg.append("line")
+        .attr("class", "avg-line")
+        .attr("x1", 0)
+        .attr("x2", width)
+        .attr("y1", yScale(avgMetaScore))
+        .attr("y2", yScale(avgMetaScore))
+        .attr("stroke", "grey")
+        .attr("stroke-width", 2)
+        .attr("stroke-dasharray", "4");
+    }
   }
 
   function resetZoom() {
@@ -318,8 +464,21 @@ function showScatterPlot(data) {
     xAxisGroup.transition(t).call(xAxis);
     yAxisGroup.transition(t).call(yAxis);
 
-    svg.select("#x-avg")
-      .transition(t)
+    const updatedData = adjustPadding(zoomLevelX, zoomLevelY);
+
+    svg.selectAll(".point").transition(t)
+      .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
+      .attr("d", d => symbol.type(shapeScale(d.platform))())
+      .on("end", attachTooltip);
+
+    svg.selectAll(".avg-line").remove();
+
+    // Re-add the initial average lines
+    const avgUserReview = d3.mean(data, d => +d.user_review);
+    const avgMetaScore = d3.mean(data, d => +d.meta_score);
+
+    svg.append("line")
+      .attr("class", "avg-line")
       .attr("x1", xScale(avgUserReview))
       .attr("x2", xScale(avgUserReview))
       .attr("y1", 0)
@@ -328,8 +487,8 @@ function showScatterPlot(data) {
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "4");
 
-    svg.select("#y-avg")
-      .transition(t)
+    svg.append("line")
+      .attr("class", "avg-line")
       .attr("x1", 0)
       .attr("x2", width)
       .attr("y1", yScale(avgMetaScore))
@@ -337,16 +496,8 @@ function showScatterPlot(data) {
       .attr("stroke", "grey")
       .attr("stroke-width", 2)
       .attr("stroke-dasharray", "4");
-
-    const updatedData = adjustPadding(zoomLevelX, zoomLevelY);
-
-    svg.selectAll(".point").transition(t)
-      .attr("transform", d => `translate(${xScale(+d.adjusted_user_review)}, ${yScale(+d.adjusted_meta_score)})`)
-      .attr("d", d => symbol.type(shapeScale(d.platform))())
-      .on("end", attachTooltip);
   }
 
-  // Tooltips
   function attachTooltip() {
     svg.selectAll(".point")
       .on("mouseover", (event, d) => {
@@ -395,103 +546,14 @@ function showScatterPlot(data) {
   }
 
   attachTooltip();
-
-  // Bar Charts
-  function updateSelectedGamesBox() {
-    const selectedGamesDiv = d3.select("#selectedGames");
-    selectedGamesDiv.html(Array.from(selectedPoints).map(p => p.split("-")[0]).join(", "));
-  }
-
-  function drawBarCharts(selectedData) {
-    const barChartWidth = width / 2;
-    const barChartMargin = { top: 20, right: 30, bottom: 70, left: 40 };
-    const barChartInnerWidth = barChartWidth - barChartMargin.left - barChartMargin.right;
-    const barChartInnerHeight = barChartHeight - barChartMargin.top - barChartMargin.bottom;
-
-    const minMetaScore = d3.min(selectedData, d => +d.meta_score) - 1;
-    const minUserReview = d3.min(selectedData, d => +d.user_review) - 0.5;
-
-    const barChartSvgMeta = d3.select("#barChartMeta")
-      .html("") // Clear previous bar chart
-      .append("svg")
-      .attr("width", barChartWidth + barChartMargin.left + barChartMargin.right)
-      .attr("height", barChartHeight + barChartMargin.top + barChartMargin.bottom)
-      .append("g")
-      .attr("transform", `translate(${barChartMargin.left}, ${barChartMargin.top})`);
-
-    const barChartSvgUser = d3.select("#barChartUser")
-      .html("") // Clear previous bar chart
-      .append("svg")
-      .attr("width", barChartWidth + barChartMargin.left + barChartMargin.right)
-      .attr("height", barChartHeight + barChartMargin.top + barChartMargin.bottom)
-      .append("g")
-      .attr("transform", `translate(${barChartMargin.left}, ${barChartMargin.top})`);
-
-    const xBarScale = d3.scaleBand()
-      .domain(selectedData.map(d => d.name))
-      .range([0, barChartInnerWidth])
-      .padding(0.2);  // Adjust padding to make bars skinnier
-
-    const yBarScaleMeta = d3.scaleLinear()
-      .domain([minMetaScore, d3.max(selectedData, d => +d.meta_score)])
-      .nice()
-      .range([barChartInnerHeight, 0]);
-
-    const yBarScaleUser = d3.scaleLinear()
-      .domain([minUserReview, d3.max(selectedData, d => +d.user_review)])
-      .nice()
-      .range([barChartInnerHeight, 0]);
-
-    barChartSvgMeta.append("g")
-      .attr("transform", `translate(0, ${barChartInnerHeight})`)
-      .call(d3.axisBottom(xBarScale))
-      .selectAll("text")
-      .attr("transform", "rotate(-45)")
-      .style("text-anchor", "end");
-
-    barChartSvgMeta.append("g")
-      .call(d3.axisLeft(yBarScaleMeta));
-
-    barChartSvgMeta.selectAll(".bar")
-      .data(selectedData)
-      .enter()
-      .append("rect")
-      .attr("class", "bar")
-      .attr("x", d => xBarScale(d.name))
-      .attr("y", d => yBarScaleMeta(+d.meta_score))
-      .attr("width", xBarScale.bandwidth())
-      .attr("height", d => barChartInnerHeight - yBarScaleMeta(+d.meta_score))
-      .attr("fill", "steelblue");
-
-    barChartSvgUser.append("g")
-      .attr("transform", `translate(0, ${barChartInnerHeight})`)
-      .call(d3.axisBottom(xBarScale))
-      .selectAll("text")
-      .attr("transform", "rotate(-45)")
-      .style("text-anchor", "end");
-
-    barChartSvgUser.append("g")
-      .call(d3.axisLeft(yBarScaleUser));
-
-    barChartSvgUser.selectAll(".bar")
-      .data(selectedData)
-      .enter()
-      .append("rect")
-      .attr("class", "bar")
-      .attr("x", d => xBarScale(d.name))
-      .attr("y", d => yBarScaleUser(+d.user_review))
-      .attr("width", xBarScale.bandwidth())
-      .attr("height", d => barChartInnerHeight - yBarScaleUser(+d.user_review))
-      .attr("fill", "orange");
-  }
 }
 
-// On filter update
 function updateScatterPlot(data) {
   const filteredData = data.filter(d => 
     selectedPlatforms.includes(d.platform) && 
     selectedAges.includes(d.target_age) && 
-    new Date(d.release_date).getFullYear() <= selectedReleaseDate
+    new Date(d.release_date).getFullYear() >= selectedReleaseDateRange[0] && 
+    new Date(d.release_date).getFullYear() <= selectedReleaseDateRange[1]
   );
 
   const svg = d3.select("#chart svg g");
@@ -529,7 +591,6 @@ function updateScatterPlot(data) {
     .attr("fill", d => colorScale(d.genre));
 
   shapes.on("click", function(event, d) {
-    console.log(d);
     const pointKey = `${d.name}-${d.platform}`;
     const isSelected = selectedPoints.has(pointKey);
     if (isSelected) {
@@ -547,7 +608,33 @@ function updateScatterPlot(data) {
     d3.select("#tooltip").transition()
       .duration(200)
       .style("opacity", .9);
-    d3.select("#tooltip").html(`Name: ${d.name}<br/>Platform: ${d.platform}<br/>Release Date: ${d.release_date}<br/>Genre: ${d.genre}<br/>Meta Score: ${d.meta_score}<br/>User Review: ${d.user_review}`)
+    d3.select("#tooltip").html(`
+      <table class="table-auto text-sm text-black">
+        <tr>
+          <td class="border border-slate-500 bg-slate-200">Name</td>
+          <td class="border border-slate-500">${d.name}</td>
+        </tr>
+        <tr>
+          <td class="border border-slate-500 bg-slate-200">Platform</td>
+          <td class="border border-slate-500">${d.platform}</td>
+        </tr>
+        <tr>
+          <td class="border border-slate-500 bg-slate-200">Release Date</td>
+          <td class="border border-slate-500">${d.release_date}</td>
+        </tr>
+        <tr>
+          <td class="border border-slate-500 bg-slate-200">Genre</td>
+          <td class="border border-slate-500">${d.genre}</td>
+        </tr>
+        <tr>
+          <td class="border border-slate-500 bg-slate-200">Meta Score</td>
+          <td class="border border-slate-500">${d.meta_score}</td>
+        </tr>
+        <tr>
+          <td class="border border-slate-500 bg-slate-200">User Review</td>
+          <td class="border border-slate-500">${d.user_review}</td>
+        </tr>
+      </table>`)
       .style("left", (event.clientX + 10) + "px")
       .style("top", (event.clientY - 25) + "px");
   });
@@ -562,99 +649,37 @@ function updateScatterPlot(data) {
       .duration(500)
       .style("opacity", 0);
   });
-}
 
-// Bar Chart
-function drawBarCharts(selectedData) {
-  const barChartWidth = width / 2;
-  const barChartMargin = { top: 20, right: 30, bottom: 70, left: 40 };
-  const barChartInnerWidth = barChartWidth - barChartMargin.left - barChartMargin.right;
-  const barChartInnerHeight = barChartHeight - barChartMargin.top - barChartMargin.bottom;
+  svg.selectAll(".avg-line").remove();
 
-  const minMetaScore = d3.min(selectedData, d => +d.meta_score) - 5;
-  const minUserReview = d3.min(selectedData, d => +d.user_review) - 5;
+  if (filteredData.length > 0) {
+    const avgUserReview = d3.mean(filteredData, d => +d.user_review);
+    const avgMetaScore = d3.mean(filteredData, d => +d.meta_score);
 
-  const barChartSvgMeta = d3.select("#barChartMeta")
-    .html("") // Clear previous bar chart
-    .append("svg")
-    .attr("width", barChartWidth + barChartMargin.left + barChartMargin.right)
-    .attr("height", barChartHeight + barChartMargin.top + barChartMargin.bottom)
-    .append("g")
-    .attr("transform", `translate(${barChartMargin.left}, ${barChartMargin.top})`);
+    svg.append("line")
+      .attr("class", "avg-line")
+      .attr("x1", xScale(avgUserReview))
+      .attr("x2", xScale(avgUserReview))
+      .attr("y1", 0)
+      .attr("y2", height)
+      .attr("stroke", "grey")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "4");
 
-  const barChartSvgUser = d3.select("#barChartUser")
-    .html("") // Clear previous bar chart
-    .append("svg")
-    .attr("width", barChartWidth + barChartMargin.left + barChartMargin.right)
-    .attr("height", barChartHeight + barChartMargin.top + barChartMargin.bottom)
-    .append("g")
-    .attr("transform", `translate(${barChartMargin.left}, ${barChartMargin.top})`);
-
-  const xBarScale = d3.scaleBand()
-    .domain(selectedData.map(d => d.name))
-    .range([0, barChartInnerWidth])
-    .padding(0.2);  // Adjust padding to make bars skinnier
-
-  const yBarScaleMeta = d3.scaleLinear()
-    .domain([minMetaScore, d3.max(selectedData, d => +d.meta_score)])
-    .nice()
-    .range([barChartInnerHeight, 0]);
-
-  const yBarScaleUser = d3.scaleLinear()
-    .domain([minUserReview, d3.max(selectedData, d => +d.user_review)])
-    .nice()
-    .range([barChartInnerHeight, 0]);
-
-  // Draw Meta Score Bar Chart
-  barChartSvgMeta.append("g")
-    .attr("transform", `translate(0, ${barChartInnerHeight})`)
-    .call(d3.axisBottom(xBarScale))
-    .selectAll("text")
-    .attr("transform", "rotate(-45)")
-    .style("text-anchor", "end");
-
-  barChartSvgMeta.append("g")
-    .call(d3.axisLeft(yBarScaleMeta));
-
-  barChartSvgMeta.selectAll(".bar")
-    .data(selectedData)
-    .enter()
-    .append("rect")
-    .attr("class", "bar")
-    .attr("x", d => xBarScale(d.name))
-    .attr("y", d => yBarScaleMeta(+d.meta_score))
-    .attr("width", xBarScale.bandwidth())
-    .attr("height", d => barChartInnerHeight - yBarScaleMeta(+d.meta_score))
-    .attr("fill", "steelblue");
-
-  // Draw User Review Bar Chart
-  barChartSvgUser.append("g")
-    .attr("transform", `translate(0, ${barChartInnerHeight})`)
-    .call(d3.axisBottom(xBarScale))
-    .selectAll("text")
-    .attr("transform", "rotate(-45)")
-    .style("text-anchor", "end");
-
-  barChartSvgUser.append("g")
-    .call(d3.axisLeft(yBarScaleUser));
-
-  barChartSvgUser.selectAll(".bar")
-    .data(selectedData)
-    .enter()
-    .append("rect")
-    .attr("class", "bar")
-    .attr("x", d => xBarScale(d.name))
-    .attr("y", d => yBarScaleUser(+d.user_review))
-    .attr("width", xBarScale.bandwidth())
-    .attr("height", d => barChartInnerHeight - yBarScaleUser(+d.user_review))
-    .attr("fill", "orange");
+    svg.append("line")
+      .attr("class", "avg-line")
+      .attr("x1", 0)
+      .attr("x2", width)
+      .attr("y1", yScale(avgMetaScore))
+      .attr("y2", yScale(avgMetaScore))
+      .attr("stroke", "grey")
+      .attr("stroke-width", 2)
+      .attr("stroke-dasharray", "4");
+  }
 }
 
 
 export const ScatterPlot = () => {
-
-  // States
-  const [releaseDate, setReleaseDate] = useState("2020");
 
   // Hooks
   useEffect(() => {
@@ -670,7 +695,8 @@ export const ScatterPlot = () => {
         const filteredData = dataset.filter(d => 
           selectedPlatforms.includes(d.platform) && 
           selectedAges.includes(d.target_age) && 
-          new Date(d.release_date).getFullYear() <= selectedReleaseDate
+          new Date(d.release_date).getFullYear() >= selectedReleaseDateRange[0] && 
+          new Date(d.release_date).getFullYear() <= selectedReleaseDateRange[1]
         );
         drawBarCharts(filteredData.filter(d => selectedPoints.has(`${d.name}-${d.platform}`)));
       })
@@ -691,18 +717,9 @@ export const ScatterPlot = () => {
       ></div>
       <div id="checkboxes"></div>
       <div id="ageCheckboxes"></div>
-      <div id="sliderContainer">
+      <div id="sliderContainer" className="w-1/2">
         <label htmlFor="releaseDateSlider">Filter by Release Date:</label>
-        <input 
-          type="range" 
-          id="releaseDateSlider" 
-          name="releaseDateSlider" 
-          min="2000" 
-          max="2020" 
-          step="1" 
-          value={releaseDate} 
-          onChange={(e) => setReleaseDate(e.target.value)} 
-        />
+        <div id="releaseDateSlider" className="w-full"></div>
         <span id="sliderValue">2020</span>
       </div>
       <button id="reset-zoom">Reset Zoom</button>
