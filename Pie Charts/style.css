@@ -1,16 +1,30 @@
-.tooltip {
-    position: absolute;
-    text-align: center;
-    width: auto;
-    height: auto;
-    padding: 5px;
-    font: 12px sans-serif;
-    background: lightsteelblue;
-    border: 0px;
-    border-radius: 8px;
-    pointer-events: none;
-}
 .chart-container {
     display: inline-block;
+    width: 350px;
+    vertical-align: top;
+    text-align: center;
     margin: 20px;
+}
+
+.chart {
+    display: inline-block;
+    width: 300px;
+    height: 300px;
+}
+
+.legend {
+    font-size: 12px;
+    text-anchor: start;
+}
+
+.legend rect {
+    width: 18px;
+    height: 18px;
+    margin-right: 5px;
+}
+
+.arc text {
+    font-size: 12px;
+    fill: white;
+    text-anchor: middle;
 }
