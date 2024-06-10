@@ -726,7 +726,7 @@ export const ScatterPlot = () => {
 
   // Hooks
   useEffect(() => {
-    d3.csv("/visualizer_genre.csv")
+    d3.csv("/csi4150-dataviz-project/visualizer_genre.csv")
       .then((dataset) => {
         selectedPlatforms = Array.from(new Set(dataset.map(d => d.platform)));
         selectedAges = Array.from(new Set(dataset.map(d => d.target_age)));

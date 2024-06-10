@@ -106,7 +106,7 @@ export const GenreScatterPlot = () => {
 
   // Hooks
   useEffect(() => {
-    d3.csv('/visualizer_genre.csv')
+    d3.csv('/csi4150-dataviz-project/visualizer_genre.csv')
       .then((dataset) => {
         dataset.forEach(d => {
           d.release_year = new Date(d.release_date).getFullYear();

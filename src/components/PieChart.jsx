@@ -69,7 +69,7 @@ export const PieChart = () => {
 
   // Hooks
   useEffect(() => {
-    d3.csv("/visualizer_genre.csv").then(function(data) {
+    d3.csv("/csi4150-dataviz-project/visualizer_genre.csv").then(function(data) {
       platforms.forEach(platform => {
         createPieChart(platform, `#pie-chart-${platform.toLowerCase()}`, data);
       });
