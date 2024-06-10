@@ -52,14 +52,15 @@ function createPieChart(platform, selector, data) {
       .attr("class", "legend");
 
   legend.append("rect")
-      .attr("width", 18)
-      .attr("height", 18)
+      .attr("width", 10)
+      .attr("height", 10)
       .style("fill", d => color(d.age));
 
   legend.append("text")
-      .attr("x", 24)
-      .attr("y", 9)
+      .attr("x", 12)
+      .attr("y", 5)
       .attr("dy", ".35em")
+      .style("fill", "#d5d5d5")
       .text(d => `${d.age}`);
 }
 
@@ -80,18 +81,18 @@ export const PieChart = () => {
       <div className="w-1/2 flex">
         <div className="w-1/3">
           <h3>PC</h3>
-          <div id="pie-chart-pc" class="chart"></div>
+          <div id="pie-chart-pc" className="chart"></div>
         </div>
         <div className="w-1/3">
           <h3>Switch</h3>
-          <div id="pie-chart-switch" class="chart"></div>
+          <div id="pie-chart-switch" className="chart"></div>
         </div>
         <div className="w-1/3">
           <h3>PlayStation</h3>
-          <div id="pie-chart-playstation" class="chart"></div>
+          <div id="pie-chart-playstation" className="chart"></div>
         </div>
       </div>
-      <div className="w-1/2 flex flex-col text-left">
+      <div className="w-1/2 flex flex-col text-left space-y-4">
         <h2 className="text-lg font-bold mb-2">* 각 플랫폼(PC, Switch, PlayStation)별 게임 등급 분포</h2>
         <p>PC와 PlayStation에서는 성인 대상 게임(M)이 가장 높은 비율을 차지하고 있습니다. 반면, Switch에서는 전연령 대상 게임(E)이 가장 높은 비율을 차지하고 있습니다</p>
       </div>

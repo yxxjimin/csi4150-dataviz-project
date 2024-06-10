@@ -81,12 +81,12 @@ function updateSelectedGamesBox() {
 }
 
 function drawBarCharts(selectedData) {
-  const barChartWidth = width / 2;
+  const barChartWidth = window.innerWidth * 0.4;
   const barChartMargin = { 
     top: 20, 
-    right: 30, 
-    bottom: 70, 
-    left: 40 
+    right: window.innerWidth * 0.05, 
+    bottom: 50, 
+    left: window.innerWidth * 0.05 
   };
   const barChartInnerWidth = barChartWidth - barChartMargin.left - barChartMargin.right;
   const barChartInnerHeight = barChartHeight - barChartMargin.top - barChartMargin.bottom;
@@ -368,6 +368,7 @@ function showScatterPlot(data) {
     .attr("y", 9)
     .attr("dy", ".35em")
     .style("text-anchor", "start")
+    .style("fill", "#d5d5d5")
     .text(d => d);
 
   const brush = d3.brush()
@@ -713,9 +714,9 @@ export const ScatterPlot = () => {
       <div className="flex w-full p-20">
         <div 
           id="chart"
-          className="w-10/12 flex flex-col justify-center"
+          className="w-9/12 flex flex-col justify-center"
         ></div>
-        <div className="w-2/12 flex flex-col space-y-4 text-left">
+        <div className="w-3/12 flex flex-col space-y-4 text-left bg-dark-mist p-6 rounded-lg">
           <div id="checkboxes" className="flex flex-col">
             <h3 className="text-lg font-bold mb-2">Platforms</h3>
           </div>
@@ -723,9 +724,9 @@ export const ScatterPlot = () => {
             <h3 className="text-lg font-bold mb-2">Target Age</h3>
             <div id="ageCheckboxes" className="flex justify-between"></div>
           </div>
-          <div id="sliderContainer" className="w-4/5">
-            <label htmlFor="releaseDateSlider">Filter by Release Date:</label>
-            <div id="releaseDateSlider" className="w-full"></div>
+          <h3 className="text-lg font-bold mb-2">Release Date</h3>
+          <div id="sliderContainer" className="w-full flex flex-col items-center">
+            <div id="releaseDateSlider" className="w-4/5 flex justify-center"></div>
             <span id="sliderValue">2020</span>
           </div>
           <div>
@@ -745,9 +746,14 @@ export const ScatterPlot = () => {
         className="absolute z-10 opacity-0 bg-white"
       ></div>
       <div
-        className="flex jusitfy-between"
+        className="w-full flex jusitfy-around"
+        >
+        <p className="w-1/2 text-center">Critic Score</p>
+        <p className="w-1/2 text-center">User Score</p>
+      </div>
+      <div
+        className="w-full flex jusitfy-between"
       >
-        {/* <div id="selectedGames"></div> */}
         <div id="barChartMeta"></div>
         <div id="barChartUser"></div>
       </div>

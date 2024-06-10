@@ -1,9 +1,14 @@
 import * as d3 from "d3";
 import { useEffect } from 'react';
 
-const width = window.innerWidth * 0.5;
-const height = window.innerHeight * 0.5;
-const margin = {top: 20, right: 150, bottom: 40, left: 60};
+const width = window.innerWidth * 0.4;
+const height = window.innerHeight * 0.4;
+const margin = {
+    top: 20, 
+    right: window.innerWidth * 0.21, 
+    bottom: 40, 
+    left: window.innerWidth * 0.05
+};
 
 function createSvg(containerId) {
     return d3.select(containerId)
@@ -11,7 +16,7 @@ function createSvg(containerId) {
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
         .append("g")
-        .attr("transform", `translate(${margin.left}, ${margin.top})`);
+        .attr("transform", `translate(0, ${margin.top})`);
 }
 
 function aggregateGenreData(data) {
@@ -92,6 +97,7 @@ function drawScatterPlot(svg, data) {
             .attr("y", 10)
             .text(d.genre)
             .style("font-size", "12px")
+            .style("fill", "#d5d5d5")
             .attr("alignment-baseline", "middle");
     });
 }
@@ -119,12 +125,12 @@ export const GenreScatterPlot = () => {
   }, []);
 
   return (
-    <div className="relative w-screen text-center flex justify-between items-center space-y-6 space-x-6 my-32 px-20 font-display">
-      <div className="w-1/2 flex flex-col text-left">
+    <div className="relative w-screen text-center flex justify-between items-center space-y-6 space-x-6 my-40 px-20 font-display">
+      <div className="w-2/5 flex flex-col text-left space-y-4">
         <h2 className="text-lg font-bold mb-2">* 각 장르별 게임 수, 평균 점수 분포</h2>
         <p>RPG 장르의 게임 수가 가장 많으며 평균 유저 리뷰 점수도 높은 편입니다. 반면, Arcade 장르의 수는 가장 적으며, 동시에 낮은 점수를 기록했습니다.</p>
       </div>
-      <div className="w-1/2 flex flex-col text-left">
+      <div className="w-3/5 flex flex-col text-left">
         <div id="chart-scatter"></div>
       </div>
     </div>
