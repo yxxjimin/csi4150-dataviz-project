@@ -38,7 +38,19 @@ function showLineChart(data) {
   const yAxis = d3.axisLeft().scale(yScale);
   const yAxisGroup = svg.append("g").call(yAxis);
 
-  const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+//   const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+  const colorScale = d3.scaleOrdinal([
+    '#4981cf',
+    '#c78740',
+    '#6bc65d',
+    '#c45162',
+    '#7c44c1',
+    '#4040c2',
+    '#b849c0',
+    '#9c9c9c',
+    '#c9c959',
+    '#6bc6c8',
+    ])
       .domain(data.map(d => d.genre));
 
   const line = d3.line()
@@ -122,16 +134,28 @@ export const LineChart = () => {
   }, []);
 
   return (
-    <div className="relative w-screen flex space-x-6 my-40 px-20 font-display">
-      <div 
-        id="line-chart"
-        className="w-9/12 flex flex-col justify-center"
-      >  
+    <>
+      <h1 className="text-3xl font-bold my-6 font-display text-center">
+        Trending
+      </h1>
+      <p className="my-3 text-center font-display">
+        연도에 따라 각 장르별로 출시된 게임의 수가 어떻게 변화했는 지 확인할 수 있습니다.
+      </p>
+      <p className="mt-3 text-center font-display">
+        특히 2017~2019년에 출시된 게임의 수가 급증한 것을 알 수 있는데, 해당 시기에 게임 산업이 급성장했음을 알 수 있습니다.
+      </p>
+      <div className="relative w-screen flex space-x-6 my-40 px-20 font-display">
+        
+        <div 
+          id="line-chart"
+          className="w-9/12 flex flex-col justify-center"
+        >  
+        </div>
+        <div className="w-3/12 flex flex-col space-y-4 text-left bg-dark-mist p-6 rounded-lg">
+          <h3 className="text-lg font-bold mb-2">Genre</h3>
+          <div id="line-legends"></div>
+        </div>
       </div>
-      <div className="w-3/12 flex flex-col space-y-4 text-left bg-dark-mist p-6 rounded-lg">
-        <h3 className="text-lg font-bold mb-2">Genre</h3>
-        <div id="line-legends"></div>
-      </div>
-    </div>
+    </>
   );
 };

@@ -3,13 +3,13 @@ import noUiSlider from 'nouislider';
 import 'nouislider/dist/nouislider.css';
 import { useEffect } from "react";
 
-const width = window.innerWidth * 0.55;
-const height = window.innerHeight * 0.6;
-const barChartHeight = 300;
+const width = window.innerWidth * 0.6;
+const height = window.innerHeight * 0.65;
+const barChartHeight = window.innerHeight * 0.5;
 const margin = { 
   top: window.innerHeight * 0.1, 
-  right: window.innerWidth * 0.2,
-  bottom: 0, 
+  right: window.innerWidth * 0.05,
+  bottom: 40, 
   left: window.innerWidth * 0.05
 };
 
@@ -83,7 +83,7 @@ function updateSelectedGamesBox() {
 function drawBarCharts(selectedData) {
   const barChartWidth = window.innerWidth * 0.4;
   const barChartMargin = { 
-    top: 20, 
+    top: 50, 
     right: window.innerWidth * 0.05, 
     bottom: 50, 
     left: window.innerWidth * 0.05 
@@ -127,13 +127,20 @@ function drawBarCharts(selectedData) {
 
   barChartSvgMeta.append("g")
     .attr("transform", `translate(0, ${barChartInnerHeight})`)
-    .call(d3.axisBottom(xBarScale))
+    .call(d3.axisBottom(xBarScale).tickSize(0))
     .selectAll("text")
     .attr("transform", "rotate(-45)")
     .style("text-anchor", "end");
 
+  barChartSvgMeta.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", (barChartWidth - barChartMargin.left) / 2 )
+    .attr("y", -(barChartMargin.top) / 2)
+    .text("Critic Score")
+    .style("fill", "#d5d5d5");
+
   barChartSvgMeta.append("g")
-    .call(d3.axisLeft(yBarScaleMeta));
+    .call(d3.axisLeft(yBarScaleMeta).tickSize(0));
 
   barChartSvgMeta.selectAll(".bar")
     .data(selectedData)
@@ -148,13 +155,20 @@ function drawBarCharts(selectedData) {
 
   barChartSvgUser.append("g")
     .attr("transform", `translate(0, ${barChartInnerHeight})`)
-    .call(d3.axisBottom(xBarScale))
+    .call(d3.axisBottom(xBarScale).tickSize(0))
     .selectAll("text")
     .attr("transform", "rotate(-45)")
     .style("text-anchor", "end");
 
+  barChartSvgUser.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", (barChartWidth - barChartMargin.left) / 2 )
+    .attr("y", -(barChartMargin.top) / 2)
+    .text("User Score")
+    .style("fill", "#d5d5d5");
+
   barChartSvgUser.append("g")
-    .call(d3.axisLeft(yBarScaleUser));
+    .call(d3.axisLeft(yBarScaleUser).tickSize(0));
 
   barChartSvgUser.selectAll(".bar")
     .data(selectedData)
@@ -185,7 +199,19 @@ function showScatterPlot(data) {
     .domain([84, d3.max(data, (d) => +d.meta_score)])
     .range([height, 0]);
 
-  const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+  // const colorScale = d3.scaleOrdinal(d3.schemeCategory10)
+  const colorScale = d3.scaleOrdinal([
+    '#4981cf',
+    '#c78740',
+    '#6bc65d',
+    '#c45162',
+    '#7c44c1',
+    '#4040c2',
+    '#b849c0',
+    '#9c9c9c',
+    '#c9c959',
+    '#6bc6c8',
+  ])
     .domain(data.map(d => d.genre));
 
   const shapeScale = d3.scaleOrdinal(d3.symbols)
@@ -193,13 +219,29 @@ function showScatterPlot(data) {
 
   const symbol = d3.symbol();
 
-  const xAxis = d3.axisBottom().scale(xScale);
+  const xAxis = d3.axisBottom().scale(xScale).tickSize(0);
   const xAxisGroup = svg.append("g")
     .attr("transform", `translate(0, ${height})`)
     .call(xAxis);
+  
+  // Add x-axis name
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("x", width / 2 + margin.left)
+    .attr("y", height + margin.bottom - 10)
+    .text("User Score")
+    .style("fill", "#d5d5d5");
 
-  const yAxis = d3.axisLeft().scale(yScale);
+  const yAxis = d3.axisLeft().scale(yScale).tickSize(0);
   const yAxisGroup = svg.append("g").call(yAxis);
+
+  svg.append("text")
+    .attr("text-anchor", "end")
+    .attr("transform", "rotate(-90)")
+    .attr("x", -height / 2 + margin.top / 2)
+    .attr("y", -margin.left + 30)
+    .text("Critic Score")
+    .style("fill", "#d5d5d5");
 
   const pointMap = {};
   data.forEach(d => {
@@ -250,7 +292,7 @@ function showScatterPlot(data) {
         d3.select(this).attr("fill", colorScale(d.genre));
       } else {
         selectedPoints.add(pointKey);
-        d3.select(this).attr("fill", "black");
+        d3.select(this).attr("fill", "white");
       }
   
       updateSelectedGamesBox();
@@ -361,7 +403,7 @@ function showScatterPlot(data) {
     .attr("x", 0)
     .attr("width", 18)
     .attr("height", 18)
-    .style("fill", d => d === "Selected" ? "black" : colorScale(d));
+    .style("fill", d => d === "Selected" ? "white" : colorScale(d));
 
   legend.append("text")
     .attr("x", 25)
@@ -602,7 +644,7 @@ function updateScatterPlot(data) {
       d3.select(this).attr("fill", colorScale(d.genre));
     } else {
       selectedPoints.add(pointKey);
-      d3.select(this).attr("fill", "black");
+      d3.select(this).attr("fill", "white");
     }
     updateSelectedGamesBox();
     drawBarCharts(filteredData.filter(d => selectedPoints.has(`${d.name}-${d.platform}`)));
@@ -708,15 +750,27 @@ export const ScatterPlot = () => {
 
   return (
     <div className="relative w-screen text-center flex flex-col justify-center items-center font-display">
-      <h1 className="text-3xl font-bold">
+      <h1 className="text-3xl font-bold my-6">
         Drag, Toggle and Select
       </h1>
-      <div className="flex w-full p-20">
-        <div 
-          id="chart"
-          className="w-9/12 flex flex-col justify-center"
-        ></div>
-        <div className="w-3/12 flex flex-col space-y-4 text-left bg-dark-mist p-6 rounded-lg">
+      <p className="my-3">
+        다양한 인터랙션을 통해 평론가 점수와 유저 점수 간 상관관계 및 플랫폼별, 연령대별, 연도별, 장르별 점수 분포를 확인할 수 있습니다. 
+      </p>
+      <p className="my-3">
+        <em className="font-bold">&lt;T&gt;</em>키를 누르고 항목을 클릭하면 특정 게임을 선택할 수 있습니다.
+      </p>
+      <div className="flex w-full px-20 py-5">
+        <div className="w-4/5">
+          <div 
+            id="chart"
+            className="w-full flex flex-col justify-center"
+          ></div>
+          <p className="w-full text-xs mt-6">
+            <em className="text-[#c45162] font-bold">* </em>참고: 평론가 점수는 0에서 100점, 유저 점수는 0에서 10점 척도로 측정.
+          </p>
+        </div>
+        
+        <div className="w-1/5 flex flex-col space-y-4 text-left bg-dark-mist p-6 rounded-lg">
           <div id="checkboxes" className="flex flex-col">
             <h3 className="text-lg font-bold mb-2">Platforms</h3>
           </div>
@@ -746,13 +800,7 @@ export const ScatterPlot = () => {
         className="absolute z-10 opacity-0 bg-white"
       ></div>
       <div
-        className="w-full flex jusitfy-around"
-        >
-        <p className="w-1/2 text-center">Critic Score</p>
-        <p className="w-1/2 text-center">User Score</p>
-      </div>
-      <div
-        className="w-full flex jusitfy-between"
+        className="w-full flex jusitfy-between p-20"
       >
         <div id="barChartMeta"></div>
         <div id="barChartUser"></div>

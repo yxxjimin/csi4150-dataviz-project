@@ -7,7 +7,7 @@ const margin = {
     top: 20, 
     right: window.innerWidth * 0.21, 
     bottom: 40, 
-    left: window.innerWidth * 0.05
+    left: window.innerWidth * 0.15
 };
 
 function createSvg(containerId) {
