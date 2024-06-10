@@ -142,7 +142,7 @@ export const LineChart = () => {
         연도에 따라 각 장르별로 출시된 게임의 수가 어떻게 변화했는 지 확인할 수 있습니다.
       </p>
       <p className="mt-3 text-center font-display">
-        특히 2017~2019년에 출시된 게임의 수가 급증한 것을 알 수 있는데, 해당 시기에 게임 산업이 급성장했음을 알 수 있습니다.
+        특히 앞서 살펴본 바와 같이 2017~2019년에 출시된 게임의 수가 급증한 것을 알 수 있습니다.
       </p>
       <div className="relative w-screen flex space-x-6 my-40 px-20 font-display">
         

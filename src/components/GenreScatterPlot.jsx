@@ -69,6 +69,7 @@ function drawScatterPlot(svg, data) {
         .attr("x", width / 2)
         .attr("y", height + margin.bottom)
         .style("text-anchor", "middle")
+        .style("fill", "#d5d5d5")
         .text("Average User Review");
 
     svg.append("text")
@@ -76,6 +77,7 @@ function drawScatterPlot(svg, data) {
         .attr("y", -margin.left + 10)
         .attr("transform", "rotate(-90)")
         .style("text-anchor", "middle")
+        .style("fill", "#d5d5d5")
         .text("Average Meta Score");
 
     // Add legend

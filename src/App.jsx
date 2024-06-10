@@ -5,6 +5,7 @@ import { ScatterPlot } from './components/ScatterPlot';
 import { PieChart } from './components/PieChart';
 import { LineChart } from './components/LineChart';
 import { IntroChart } from './components/IntroChart';
+import { Histogram } from './components/Histogram';
 
 
 
@@ -74,6 +75,7 @@ const App = () => {
       <ScatterPlot />
       <PieChart />
       <GenreScatterPlot />
+      <Histogram />
       <LineChart />
     </>
   )

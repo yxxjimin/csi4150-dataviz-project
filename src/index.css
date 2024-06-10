@@ -41,13 +41,13 @@ h1 {
 }
 
 /**** Custom styles for noUiSlider ****/
-.noUi-connect {
+/* .noUi-connect {
 	background: white;
 }
 .noUi-horizontal .noUi-handle, .noUi-vertical .noUi-handle {
 	background: #4e80ee;
   
-}
+} */
 .noUi-target.noUi-horizontal .noUi-tooltip {
 	background-color: purple;
   display: none;
